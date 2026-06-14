@@ -1,0 +1,12 @@
+[
+  {
+    "id": "rainbow_meadow",
+    "name": { "es": "Prado arcoiris", "ca": "Prat arc de Sant Marti" },
+    "levelIds": ["meadow_1", "meadow_2"]
+  },
+  {
+    "id": "star_castle",
+    "name": { "es": "Castillo de estrellas", "ca": "Castell d'estrelles" },
+    "levelIds": ["castle_1"]
+  }
+]

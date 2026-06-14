@@ -1,0 +1,14 @@
+[
+  {
+    "id": "add_basic",
+    "operation": "add",
+    "visiblePattern": "Cuanto es {left} + {right}?",
+    "spokenPattern": "Cuanto es {left} mas {right}?"
+  },
+  {
+    "id": "subtract_basic",
+    "operation": "subtract",
+    "visiblePattern": "Cuanto es {left} - {right}?",
+    "spokenPattern": "Cuanto es {left} menos {right}?"
+  }
+]

@@ -1,0 +1,22 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+pubspec.lock
+
+# IDEs
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated native folders can be recreated with `flutter create .`
+luna_math_adventure/.metadata
+
+# Local secrets/config
+*.env
+*.local

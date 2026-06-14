@@ -1,0 +1,4 @@
+enum UnicornVariant {
+  unicorn,
+  unicornia,
+}

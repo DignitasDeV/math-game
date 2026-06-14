@@ -1,0 +1,26 @@
+[
+  {
+    "id": "meadow_1",
+    "worldId": "rainbow_meadow",
+    "minNumber": 0,
+    "maxNumber": 5,
+    "operations": ["count", "add"],
+    "avoidRecentCount": 3
+  },
+  {
+    "id": "meadow_2",
+    "worldId": "rainbow_meadow",
+    "minNumber": 0,
+    "maxNumber": 10,
+    "operations": ["add", "subtract"],
+    "avoidRecentCount": 4
+  },
+  {
+    "id": "castle_1",
+    "worldId": "star_castle",
+    "minNumber": 0,
+    "maxNumber": 20,
+    "operations": ["add", "subtract"],
+    "avoidRecentCount": 5
+  }
+]

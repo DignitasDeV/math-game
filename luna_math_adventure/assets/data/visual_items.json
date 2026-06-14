@@ -1,0 +1,12 @@
+[
+  {
+    "id": "star",
+    "assetPath": "assets/images/items/star.png",
+    "semanticLabel": { "es": "estrella", "ca": "estrella" }
+  },
+  {
+    "id": "heart",
+    "assetPath": "assets/images/items/heart.png",
+    "semanticLabel": { "es": "corazon", "ca": "cor" }
+  }
+]

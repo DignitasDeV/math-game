@@ -1,0 +1,10 @@
+[
+  {
+    "id": "counting",
+    "title": { "es": "Contar objetos", "ca": "Comptar objectes" },
+    "body": {
+      "es": "Toca cada objeto una vez y di el numero en voz alta.",
+      "ca": "Toca cada objecte una vegada i digues el numero en veu alta."
+    }
+  }
+]

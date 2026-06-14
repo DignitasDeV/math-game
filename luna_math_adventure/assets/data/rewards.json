@@ -1,0 +1,7 @@
+[
+  {
+    "id": "star_badge",
+    "name": { "es": "Insignia de estrella", "ca": "Insignia d'estrella" },
+    "assetPath": "assets/images/rewards/star_badge.png"
+  }
+]

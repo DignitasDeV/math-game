@@ -1,0 +1,10 @@
+{
+  "visible": {
+    "home.title": { "es": "Inicio", "ca": "Inici" },
+    "game.listen": { "es": "Leer en voz alta", "ca": "Llegir en veu alta" }
+  },
+  "spoken": {
+    "feedback.correct": { "es": "Muy bien, lo has conseguido.", "ca": "Molt be, ho has aconseguit." },
+    "feedback.tryAgain": { "es": "Casi. Vamos a probar con una pista.", "ca": "Gairebe. Provem amb una pista." }
+  }
+}
