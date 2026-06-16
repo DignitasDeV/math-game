@@ -175,6 +175,20 @@ Reglas:
 
 ## Feedback
 
+## Personaje en partida
+
+En la pantalla de juego, Luna/Luno aparece como guía de misión junto a una burbuja breve.
+
+Uso de emociones:
+
+- `idle`: presenta la misión del nivel.
+- `thinking`: aparece al pedir pista.
+- `happy`: aparece tras una respuesta correcta.
+- `encouraging`: aparece tras una respuesta incorrecta amable.
+- `celebrating`: aparece al completar nivel.
+
+La niña debe sentir que ayuda al unicornio a avanzar, iluminar zonas o recuperar magia del mundo, no que está haciendo una ficha aislada.
+
 Correcto:
 
 - sparkle.
@@ -192,6 +206,8 @@ Incorrecto:
 
 - no usar rojo agresivo.
 - no sonar a castigo.
+- no mostrar al personaje triste o decepcionado.
+- usar estado `encouraging`: calma, apoyo y compañía.
 - sugerir pista.
 
 Ejemplos:

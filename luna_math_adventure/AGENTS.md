@@ -115,21 +115,54 @@ Home debe tener:
 
 ## Tema visual
 
-Usar colores pastel y formas redondeadas.
+Usar colores pastel, formas redondeadas (20px cards, 16px botones) y fuente Nunito via `google_fonts`.
 
-Paleta inicial:
+Paleta completa definida en `lib/app/theme/app_colors.dart`:
 
 ```text
-Rosa pastel:        #F8A9D8
-Lila suave:         #C7A4FF
-Azul cielo:         #A9DDFB
-Menta suave:        #BDF7D1
-Amarillo estrella:  #FFE680
-Blanco cálido:      #FFF8F0
-Morado texto:       #5C3A7D
-Verde acierto:      #7ED957
-Naranja pista:      #FFB84D
+Fondos:
+  Blanco cálido (cloud):  #FFF8F0
+  Gradiente fondo:        #FFF8F0 → #F3E8FF
+
+Primarios pastel:
+  Rosa mágico:            #F8A9D8
+  Lila suave:             #C7A4FF
+  Azul cielo:             #A9DDFB
+  Menta suave:            #BDF7D1
+  Amarillo estrella:      #FFE680
+
+Acentos saturados:
+  Rosa acento:            #FF6FAE
+  Lila acento:            #9B6FE8
+  Menta acento:           #4ECDC4
+
+Texto:
+  Morado texto:           #5C3A7D
+  Morado texto claro:     #8B6BAF
+
+Feedback:
+  Verde acierto:          #7ED957
+  Naranja pista:          #FFB84D
+  Error suave:            #FF9BAA
 ```
+
+## Componentes reutilizables
+
+Componentes en `lib/core/widgets/`:
+
+- `AppActionTile` — tarjeta de acción con icono, label y color pastel.
+- `AppScreenHeader` — cabecera con emoji/icono + título + subtítulo.
+- `ResponsiveActionGrid` — grid responsive sin scroll (Expanded rows).
+- `MagicScaffold` — scaffold con gradiente, AppBar transparente.
+- `PlaceholderPage` — página placeholder con emoji y badge "Proximamente".
+
+Usar estos componentes en lugar de crear estilos ad-hoc por pantalla.
+
+## Iconos
+
+- Iconos funcionales: `material_symbols_icons` (variante `_rounded`), importar con `import 'package:material_symbols_icons/symbols.dart'`.
+- Emojis nativos: para cabeceras de pantalla y splash.
+- No generar iconos funcionales con IA.
 
 ## Localización e idioma
 

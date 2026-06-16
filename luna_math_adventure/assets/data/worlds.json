@@ -1,12 +1,123 @@
 [
   {
-    "id": "rainbow_meadow",
-    "name": { "es": "Prado arcoiris", "ca": "Prat arc de Sant Marti" },
-    "levelIds": ["meadow_1", "meadow_2"]
+    "id": "heart_forest",
+    "sortOrder": 1,
+    "isImplemented": true,
+    "name": {
+      "es": "Bosque de Corazones",
+      "ca": "Bosc de Cors"
+    },
+    "description": {
+      "es": "Cuenta, suma y resta con corazones mágicos.",
+      "ca": "Compta, suma i resta amb cors màgics."
+    },
+    "backgroundAssetPath": "assets/images/backgrounds/heart_forest_screen.webp",
+    "levelIds": [
+      "heart_forest_01",
+      "heart_forest_02",
+      "heart_forest_03",
+      "heart_forest_04",
+      "heart_forest_05",
+      "heart_forest_boss"
+    ]
   },
   {
-    "id": "star_castle",
-    "name": { "es": "Castillo de estrellas", "ca": "Castell d'estrelles" },
-    "levelIds": ["castle_1"]
+    "id": "star_lake",
+    "sortOrder": 2,
+    "isImplemented": true,
+    "name": {
+      "es": "Lago de Estrellas",
+      "ca": "Llac d'Estrelles"
+    },
+    "description": {
+      "es": "Sumas y restas hasta 10 bajo un cielo tranquilo.",
+      "ca": "Sumes i restes fins a 10 sota un cel tranquil."
+    },
+    "backgroundAssetPath": "assets/images/backgrounds/star_lake_screen.webp",
+    "levelIds": [
+      "star_lake_01",
+      "star_lake_02",
+      "star_lake_03",
+      "star_lake_04",
+      "star_lake_boss"
+    ]
+  },
+  {
+    "id": "rainbow_path",
+    "sortOrder": 3,
+    "isImplemented": true,
+    "name": {
+      "es": "Camino Arcoíris",
+      "ca": "Camí Arc de Sant Martí"
+    },
+    "description": {
+      "es": "Números hasta 20 con nubes y caminos desbloqueables.",
+      "ca": "Nombres fins a 20 amb núvols i camins desbloquejables."
+    },
+    "backgroundAssetPath": "assets/images/backgrounds/rainbow_path_screen.webp",
+    "levelIds": [
+      "rainbow_path_01",
+      "rainbow_path_02",
+      "rainbow_path_03",
+      "rainbow_path_04",
+      "rainbow_path_boss"
+    ]
+  },
+  {
+    "id": "crystal_castle",
+    "sortOrder": 4,
+    "isImplemented": true,
+    "name": {
+      "es": "Castillo de Cristal",
+      "ca": "Castell de Cristall"
+    },
+    "description": {
+      "es": "Decenas, unidades y gemas mágicas.",
+      "ca": "Desenes, unitats i gemmes màgiques."
+    },
+    "backgroundAssetPath": "assets/images/backgrounds/crystal_castle_screen.webp",
+    "levelIds": [
+      "crystal_castle_01",
+      "crystal_castle_02",
+      "crystal_castle_03",
+      "crystal_castle_04",
+      "crystal_castle_boss"
+    ]
+  },
+  {
+    "id": "magic_tower",
+    "sortOrder": 5,
+    "isImplemented": true,
+    "name": {
+      "es": "Torre Mágica",
+      "ca": "Torre Màgica"
+    },
+    "description": {
+      "es": "Retos avanzados con pistas paso a paso.",
+      "ca": "Reptes avançats amb pistes pas a pas."
+    },
+    "backgroundAssetPath": "assets/images/backgrounds/magic_tower_screen.webp",
+    "levelIds": [
+      "magic_tower_01",
+      "magic_tower_02",
+      "magic_tower_03",
+      "magic_tower_04",
+      "magic_tower_boss"
+    ]
+  },
+  {
+    "id": "flower_garden",
+    "sortOrder": 6,
+    "isImplemented": false,
+    "name": {
+      "es": "Jardín de Flores",
+      "ca": "Jardí de Flors"
+    },
+    "description": {
+      "es": "Un mundo futuro lleno de flores y nuevos retos mágicos.",
+      "ca": "Un món futur ple de flors i nous reptes màgics."
+    },
+    "backgroundAssetPath": "assets/images/backgrounds/home_background_screen.webp",
+    "levelIds": []
   }
 ]

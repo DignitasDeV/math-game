@@ -147,7 +147,8 @@ Formatos recomendados:
 - `.png` si se necesita transparencia especial.
 - `.svg` para iconos.
 - `.json` para Lottie.
-- `.mp3` para audio.
+- `.wav` para SFX cortos.
+- `.mp3` para musica y audios largos.
 - `.json` para datos de niveles, ayuda, traducciones y recompensas.
 
 ## Dependencias iniciales esperadas

@@ -277,7 +277,7 @@ Usar nombres claros:
 character_unicorn_female_idle.webp
 item_heart_pink.webp
 reward_crown_pink.webp
-sfx_correct_01.mp3
+sfx_correct_01.wav
 animation_confetti_01.json
 ```
 

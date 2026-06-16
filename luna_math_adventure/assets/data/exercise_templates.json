@@ -1,14 +1,74 @@
 [
   {
-    "id": "add_basic",
-    "operation": "add",
-    "visiblePattern": "Cuanto es {left} + {right}?",
-    "spokenPattern": "Cuanto es {left} mas {right}?"
+    "id": "count_items_basic",
+    "type": "count",
+    "texts": {
+      "es": {
+        "visible": "Cuenta {itemPluralWithArticle}.",
+        "spoken": "Cuenta {itemPluralWithArticle}. {countQuestion}",
+        "hint": "Mira cada {itemSingular} una vez y cuenta despacito.",
+        "spokenHint": "Mira cada {itemSingular} una vez. Uno, dos, tres..."
+      },
+      "ca": {
+        "visible": "Compta {itemPluralWithArticle}.",
+        "spoken": "Compta {itemPluralWithArticle}. {countQuestion}",
+        "hint": "Mira cada {itemSingular} una vegada i compta a poc a poc.",
+        "spokenHint": "Mira cada {itemSingular} una vegada. Un, dos, tres..."
+      }
+    }
   },
   {
-    "id": "subtract_basic",
-    "operation": "subtract",
-    "visiblePattern": "Cuanto es {left} - {right}?",
-    "spokenPattern": "Cuanto es {left} menos {right}?"
+    "id": "character_gets_more_items",
+    "type": "addition",
+    "texts": {
+      "es": {
+        "visible": "{characterName} tiene {a} {aItemLabel} y recibe {b} {bItemLabel} más. {totalQuestion}",
+        "spoken": "{characterName} tiene {aSpokenItemCount} y recibe {bSpokenItemCount} más. {totalQuestion}",
+        "hint": "{additionHint}",
+        "spokenHint": "{additionHint}"
+      },
+      "ca": {
+        "visible": "{characterName} té {a} {aItemLabel} i rep {b} {bItemLabel} més. {totalQuestion}",
+        "spoken": "{characterName} té {aSpokenItemCount} i rep {bSpokenItemCount} més. {totalQuestion}",
+        "hint": "{additionHint}",
+        "spokenHint": "{additionHint}"
+      }
+    }
+  },
+  {
+    "id": "character_gives_away_items",
+    "type": "subtraction",
+    "texts": {
+      "es": {
+        "visible": "{characterName} tiene {a} {aItemLabel} y entrega {b} {bItemLabel}. {remainingQuestion}",
+        "spoken": "{characterName} tiene {aSpokenItemCount} y entrega {bSpokenItemCount}. {remainingQuestion}",
+        "hint": "{subtractionHint}",
+        "spokenHint": "{subtractionHint}"
+      },
+      "ca": {
+        "visible": "{characterName} té {a} {aItemLabel} i dona {b} {bItemLabel}. {remainingQuestion}",
+        "spoken": "{characterName} té {aSpokenItemCount} i dona {bSpokenItemCount}. {remainingQuestion}",
+        "hint": "{subtractionHint}",
+        "spokenHint": "{subtractionHint}"
+      }
+    }
+  },
+  {
+    "id": "number_decomposition_units",
+    "type": "decomposition",
+    "texts": {
+      "es": {
+        "visible": "{a} tiene {tens} {tensLabel}. ¿Cuántas unidades sueltas tiene?",
+        "spoken": "{aWords} tiene {tensWords} {tensLabel}. ¿Cuántas unidades sueltas tiene?",
+        "hint": "Separa {a} en decenas y unidades. Mira el número de la derecha.",
+        "spokenHint": "Separa {aWords} en decenas y unidades. Mira el número de la derecha."
+      },
+      "ca": {
+        "visible": "{a} té {tens} {tensLabel}. Quantes unitats soltes té?",
+        "spoken": "{aWords} té {tensWords} {tensLabel}. Quantes unitats soltes té?",
+        "hint": "Separa {a} en desenes i unitats. Mira el número de la dreta.",
+        "spokenHint": "Separa {aWords} en desenes i unitats. Mira el número de la dreta."
+      }
+    }
   }
 ]

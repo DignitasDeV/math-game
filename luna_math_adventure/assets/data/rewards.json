@@ -1,7 +1,200 @@
 [
   {
-    "id": "star_badge",
-    "name": { "es": "Insignia de estrella", "ca": "Insignia d'estrella" },
-    "assetPath": "assets/images/rewards/star_badge.png"
+    "id": "sticker_heart",
+    "type": "sticker",
+    "name": { "es": "Pegatina de corazón", "ca": "Enganxina de cor" },
+    "assetPath": "assets/images/rewards/stickers/sticker_heart.webp"
+  },
+  {
+    "id": "sticker_star",
+    "type": "sticker",
+    "name": { "es": "Pegatina de estrella", "ca": "Enganxina d'estrella" },
+    "assetPath": "assets/images/rewards/stickers/sticker_star.webp"
+  },
+  {
+    "id": "badge_first_sum",
+    "type": "badge",
+    "name": { "es": "Primera suma", "ca": "Primera suma" },
+    "assetPath": "assets/images/rewards/badges/badge_first_sum.webp"
+  },
+  {
+    "id": "bow_heart",
+    "type": "accessory",
+    "name": { "es": "Lazo de corazón", "ca": "Llaç de cor" },
+    "assetPath": "assets/images/rewards/accessories/bow_heart.webp"
+  },
+  {
+    "id": "badge_subtraction_beginner",
+    "type": "badge",
+    "name": { "es": "Primeras restas", "ca": "Primeres restes" },
+    "assetPath": "assets/images/rewards/badges/badge_subtraction_beginner.webp"
+  },
+  {
+    "id": "crown_pink",
+    "type": "accessory",
+    "name": { "es": "Corona rosa", "ca": "Corona rosa" },
+    "assetPath": "assets/images/rewards/accessories/crown_pink.webp"
+  },
+  {
+    "id": "sticker_lake_star",
+    "type": "sticker",
+    "name": { "es": "Estrella del lago", "ca": "Estrella del llac" },
+    "assetPath": "assets/images/rewards/stickers/sticker_lake_star.webp"
+  },
+  {
+    "id": "badge_lake_addition",
+    "type": "badge",
+    "name": { "es": "Sumas del lago", "ca": "Sumes del llac" },
+    "assetPath": "assets/images/rewards/badges/badge_lake_addition.webp"
+  },
+  {
+    "id": "badge_lake_subtraction",
+    "type": "badge",
+    "name": { "es": "Restas del lago", "ca": "Restes del llac" },
+    "assetPath": "assets/images/rewards/badges/badge_lake_subtraction.webp"
+  },
+  {
+    "id": "sticker_moon_lake",
+    "type": "sticker",
+    "name": { "es": "Luna del lago", "ca": "Lluna del llac" },
+    "assetPath": "assets/images/rewards/stickers/sticker_moon_lake.webp"
+  },
+  {
+    "id": "tiara_star_lake",
+    "type": "accessory",
+    "name": { "es": "Tiara de estrella", "ca": "Tiara d'estrella" },
+    "assetPath": "assets/images/rewards/accessories/tiara_star_lake.webp"
+  },
+  {
+    "id": "sticker_rainbow_cloud",
+    "type": "sticker",
+    "name": { "es": "Nube arcoíris", "ca": "Núvol arc de Sant Martí" },
+    "assetPath": "assets/images/rewards/stickers/sticker_rainbow_cloud.webp"
+  },
+  {
+    "id": "badge_count_to_20",
+    "type": "badge",
+    "name": { "es": "Números hasta 20", "ca": "Nombres fins a 20" },
+    "assetPath": "assets/images/rewards/badges/badge_count_to_20.webp"
+  },
+  {
+    "id": "badge_rainbow_addition",
+    "type": "badge",
+    "name": { "es": "Sumas arcoíris", "ca": "Sumes arc de Sant Martí" },
+    "assetPath": "assets/images/rewards/badges/badge_rainbow_addition.webp"
+  },
+  {
+    "id": "badge_rainbow_subtraction",
+    "type": "badge",
+    "name": { "es": "Restas arcoíris", "ca": "Restes arc de Sant Martí" },
+    "assetPath": "assets/images/rewards/badges/badge_rainbow_subtraction.webp"
+  },
+  {
+    "id": "cape_rainbow",
+    "type": "accessory",
+    "name": { "es": "Capa arcoíris", "ca": "Capa arc de Sant Martí" },
+    "assetPath": "assets/images/rewards/accessories/cape_rainbow.webp"
+  },
+  {
+    "id": "sticker_crystal_gem",
+    "type": "sticker",
+    "name": { "es": "Gema de cristal", "ca": "Gemma de cristall" },
+    "assetPath": "assets/images/rewards/stickers/sticker_crystal_gem.webp"
+  },
+  {
+    "id": "badge_units_tens",
+    "type": "badge",
+    "name": { "es": "Decenas y unidades", "ca": "Desenes i unitats" },
+    "assetPath": "assets/images/rewards/badges/badge_units_tens.webp"
+  },
+  {
+    "id": "badge_crystal_addition",
+    "type": "badge",
+    "name": { "es": "Sumas de cristal", "ca": "Sumes de cristall" },
+    "assetPath": "assets/images/rewards/badges/badge_crystal_addition.webp"
+  },
+  {
+    "id": "badge_crystal_subtraction",
+    "type": "badge",
+    "name": { "es": "Restas de cristal", "ca": "Restes de cristall" },
+    "assetPath": "assets/images/rewards/badges/badge_crystal_subtraction.webp"
+  },
+  {
+    "id": "crown_crystal",
+    "type": "accessory",
+    "name": { "es": "Corona de cristal", "ca": "Corona de cristall" },
+    "assetPath": "assets/images/rewards/accessories/crown_crystal.webp"
+  },
+  {
+    "id": "sticker_magic_tower",
+    "type": "sticker",
+    "name": { "es": "Torre mágica", "ca": "Torre màgica" },
+    "assetPath": "assets/images/rewards/stickers/sticker_magic_tower.webp"
+  },
+  {
+    "id": "badge_big_addition",
+    "type": "badge",
+    "name": { "es": "Sumas grandes", "ca": "Sumes grans" },
+    "assetPath": "assets/images/rewards/badges/badge_big_addition.webp"
+  },
+  {
+    "id": "badge_big_subtraction",
+    "type": "badge",
+    "name": { "es": "Restas grandes", "ca": "Restes grans" },
+    "assetPath": "assets/images/rewards/badges/badge_big_subtraction.webp"
+  },
+  {
+    "id": "badge_advanced_addition",
+    "type": "badge",
+    "name": { "es": "Magia avanzada", "ca": "Màgia avançada" },
+    "assetPath": "assets/images/rewards/badges/badge_advanced_addition.webp"
+  },
+  {
+    "id": "crown_magic_tower",
+    "type": "accessory",
+    "name": { "es": "Corona de la torre", "ca": "Corona de la torre" },
+    "assetPath": "assets/images/rewards/accessories/crown_magic_tower.webp"
+  },
+  {
+    "id": "magic_wand",
+    "type": "accessory",
+    "name": { "es": "Varita magica", "ca": "Vareta magica" },
+    "assetPath": "assets/images/rewards/accessories/magic_wand.webp"
+  },
+  {
+    "id": "necklace_star",
+    "type": "accessory",
+    "name": { "es": "Collar de estrella", "ca": "Collar d'estrella" },
+    "assetPath": "assets/images/rewards/accessories/necklace_star.webp"
+  },
+  {
+    "id": "wings_rainbow",
+    "type": "accessory",
+    "name": { "es": "Alas arcoiris", "ca": "Ales arc de Sant Marti" },
+    "assetPath": "assets/images/rewards/accessories/wings_rainbow.webp"
+  },
+  {
+    "id": "badge_10_correct",
+    "type": "badge",
+    "name": { "es": "10 aciertos", "ca": "10 encerts" },
+    "assetPath": "assets/images/rewards/badges/badge_10_correct.webp"
+  },
+  {
+    "id": "badge_level_complete",
+    "type": "badge",
+    "name": { "es": "Nivel completado", "ca": "Nivell completat" },
+    "assetPath": "assets/images/rewards/badges/badge_level_complete.webp"
+  },
+  {
+    "id": "sticker_rainbow",
+    "type": "sticker",
+    "name": { "es": "Pegatina arcoiris", "ca": "Enganxina arc de Sant Marti" },
+    "assetPath": "assets/images/rewards/stickers/sticker_rainbow.webp"
+  },
+  {
+    "id": "sticker_unicorn",
+    "type": "sticker",
+    "name": { "es": "Pegatina de unicornio", "ca": "Enganxina d'unicorn" },
+    "assetPath": "assets/images/rewards/stickers/sticker_unicorn.webp"
   }
 ]

@@ -1,12 +1,162 @@
 [
   {
-    "id": "star",
-    "assetPath": "assets/images/items/star.png",
-    "semanticLabel": { "es": "estrella", "ca": "estrella" }
+    "id": "heart_pink",
+    "assetPath": "assets/images/items/heart_pink.webp",
+    "labels": {
+      "es": {
+        "gender": "masculine",
+        "singular": "corazón",
+        "plural": "corazones",
+        "pluralWithArticle": "los corazones",
+        "oneWithArticle": "un corazón"
+      },
+      "ca": {
+        "gender": "masculine",
+        "singular": "cor",
+        "plural": "cors",
+        "pluralWithArticle": "els cors",
+        "oneWithArticle": "un cor"
+      }
+    }
   },
   {
-    "id": "heart",
-    "assetPath": "assets/images/items/heart.png",
-    "semanticLabel": { "es": "corazon", "ca": "cor" }
+    "id": "star_yellow",
+    "assetPath": "assets/images/items/star_yellow.webp",
+    "labels": {
+      "es": {
+        "gender": "feminine",
+        "singular": "estrella",
+        "plural": "estrellas",
+        "pluralWithArticle": "las estrellas",
+        "oneWithArticle": "una estrella"
+      },
+      "ca": {
+        "gender": "feminine",
+        "singular": "estrella",
+        "plural": "estrelles",
+        "pluralWithArticle": "les estrelles",
+        "oneWithArticle": "una estrella"
+      }
+    }
+  },
+  {
+    "id": "flower_blue",
+    "assetPath": "assets/images/items/flower_blue.webp",
+    "labels": {
+      "es": {
+        "gender": "feminine",
+        "singular": "flor",
+        "plural": "flores",
+        "pluralWithArticle": "las flores",
+        "oneWithArticle": "una flor"
+      },
+      "ca": {
+        "gender": "feminine",
+        "singular": "flor",
+        "plural": "flors",
+        "pluralWithArticle": "les flors",
+        "oneWithArticle": "una flor"
+      }
+    }
+  },
+  {
+    "id": "cupcake_pink",
+    "assetPath": "assets/images/items/cupcake_pink.webp",
+    "labels": {
+      "es": {
+        "gender": "masculine",
+        "singular": "pastelito",
+        "plural": "pastelitos",
+        "pluralWithArticle": "los pastelitos",
+        "oneWithArticle": "un pastelito"
+      },
+      "ca": {
+        "gender": "masculine",
+        "singular": "pastisset",
+        "plural": "pastissets",
+        "pluralWithArticle": "els pastissets",
+        "oneWithArticle": "un pastisset"
+      }
+    }
+  },
+  {
+    "id": "cloud_white",
+    "assetPath": "assets/images/items/cloud_white.webp",
+    "labels": {
+      "es": {
+        "gender": "feminine",
+        "singular": "nube",
+        "plural": "nubes",
+        "pluralWithArticle": "las nubes",
+        "oneWithArticle": "una nube"
+      },
+      "ca": {
+        "gender": "masculine",
+        "singular": "núvol",
+        "plural": "núvols",
+        "pluralWithArticle": "els núvols",
+        "oneWithArticle": "un núvol"
+      }
+    }
+  },
+  {
+    "id": "gem_purple",
+    "assetPath": "assets/images/items/gem_purple.webp",
+    "labels": {
+      "es": {
+        "gender": "feminine",
+        "singular": "gema",
+        "plural": "gemas",
+        "pluralWithArticle": "las gemas",
+        "oneWithArticle": "una gema"
+      },
+      "ca": {
+        "gender": "feminine",
+        "singular": "gemma",
+        "plural": "gemmes",
+        "pluralWithArticle": "les gemmes",
+        "oneWithArticle": "una gemma"
+      }
+    }
+  },
+  {
+    "id": "ten_block",
+    "assetPath": "assets/images/items/ten_block.webp",
+    "labels": {
+      "es": {
+        "gender": "masculine",
+        "singular": "bloque de diez",
+        "plural": "bloques de diez",
+        "pluralWithArticle": "los bloques de diez",
+        "oneWithArticle": "un bloque de diez"
+      },
+      "ca": {
+        "gender": "masculine",
+        "singular": "bloc de deu",
+        "plural": "blocs de deu",
+        "pluralWithArticle": "els blocs de deu",
+        "oneWithArticle": "un bloc de deu"
+      }
+    }
+  },
+  {
+    "id": "unit_cube",
+    "assetPath": "assets/images/items/unit_cube.webp",
+    "labels": {
+      "es": {
+        "gender": "masculine",
+        "singular": "cubito",
+        "plural": "cubitos",
+        "pluralWithArticle": "los cubitos",
+        "oneWithArticle": "un cubito"
+      },
+      "ca": {
+        "gender": "masculine",
+        "singular": "cubet",
+        "plural": "cubets",
+        "pluralWithArticle": "els cubets",
+        "oneWithArticle": "un cubet"
+      }
+    }
   }
 ]

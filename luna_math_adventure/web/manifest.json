@@ -1,0 +1,10 @@
+{
+  "name": "Luna Math Adventure",
+  "short_name": "Luna Math",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F8F0FF",
+  "theme_color": "#8B5CF6",
+  "description": "Juego educativo infantil de matemáticas con temática mágica.",
+  "orientation": "portrait-primary"
+}

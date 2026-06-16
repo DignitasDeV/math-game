@@ -92,19 +92,19 @@ Cuando habla el TTS:
 
 ```text
 assets/audio/sfx/ui/
-  tap_01.mp3
-  back_01.mp3
+  tap_01.wav
+  back_01.wav
 
 assets/audio/sfx/feedback/
-  correct_01.mp3
-  wrong_soft_01.mp3
-  hint_open_01.mp3
+  correct_01.wav
+  wrong_soft_01.wav
+  hint_open_01.wav
 
 assets/audio/sfx/rewards/
-  sparkle_01.mp3
-  reward_unlock_01.mp3
-  level_complete_01.mp3
-  sticker_collected_01.mp3
+  sparkle_01.wav
+  reward_unlock_01.wav
+  level_complete_01.wav
+  sticker_collected_01.wav
 ```
 
 ## Música inicial
@@ -119,7 +119,7 @@ Recomendación:
 
 - música baja.
 - volumen inicial 20-30%.
-- SFX 70-100%.
+- SFX `.wav` 70-100%.
 - TTS prioridad máxima.
 
 ## Fuentes recomendadas

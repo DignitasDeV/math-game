@@ -1,10 +1,464 @@
 [
   {
-    "id": "counting",
-    "title": { "es": "Contar objetos", "ca": "Comptar objectes" },
+    "id": "numbers",
+    "category": { "es": "Primeros numeros", "ca": "Primers nombres" },
+    "sortOrder": 1,
+    "title": { "es": "Que son los numeros", "ca": "Que son els nombres" },
+    "summary": {
+      "es": "Los numeros nos ayudan a decir cuantos hay.",
+      "ca": "Els nombres ens ajuden a dir quants n'hi ha."
+    },
     "body": {
-      "es": "Toca cada objeto una vez y di el numero en voz alta.",
-      "ca": "Toca cada objecte una vegada i digues el numero en veu alta."
-    }
+      "es": "Un numero es una forma de contar cosas. Cada numero nos dice una cantidad.",
+      "ca": "Un nombre es una manera de comptar coses. Cada nombre ens diu una quantitat."
+    },
+    "spokenText": {
+      "es": "Los numeros sirven para contar cantidades.",
+      "ca": "Els nombres serveixen per comptar quantitats."
+    },
+    "examples": [
+      {
+        "es": "Si ves 3 estrellas, puedes decir: hay 3 estrellas.",
+        "ca": "Si veus 3 estrelles, pots dir: hi ha 3 estrelles."
+      },
+      {
+        "es": "Puedes contar pasos: 1, 2, 3, 4.",
+        "ca": "Pots comptar passos: 1, 2, 3, 4."
+      },
+      {
+        "es": "Tambien puedes contar dedos, juguetes, nubes o corazones.",
+        "ca": "Tambe pots comptar dits, joguines, nuvols o cors."
+      }
+    ],
+    "exampleType": "numbers"
+  },
+  {
+    "id": "counting",
+    "category": { "es": "Primeros numeros", "ca": "Primers nombres" },
+    "sortOrder": 2,
+    "title": { "es": "Contar objetos", "ca": "Comptar objectes" },
+    "summary": {
+      "es": "Toca cada objeto una vez y cuenta despacio.",
+      "ca": "Toca cada objecte una vegada i compta a poc a poc."
+    },
+    "body": {
+      "es": "Para contar, senala cada objeto una sola vez. Di un numero por cada objeto.",
+      "ca": "Per comptar, assenyala cada objecte una sola vegada. Digues un nombre per cada objecte."
+    },
+    "spokenText": {
+      "es": "Para contar bien, toca cada objeto una sola vez.",
+      "ca": "Per comptar be, toca cada objecte una sola vegada."
+    },
+    "examples": [
+      {
+        "es": "Cuenta 4 estrellas tocando una por una: 1, 2, 3, 4.",
+        "ca": "Compta 4 estrelles tocant-les una per una: 1, 2, 3, 4."
+      },
+      {
+        "es": "Si cuentas una estrella dos veces, el resultado cambia.",
+        "ca": "Si comptes una estrella dues vegades, el resultat canvia."
+      },
+      {
+        "es": "Un buen truco es tocar, mirar y decir el numero despacio.",
+        "ca": "Un bon truc es tocar, mirar i dir el nombre a poc a poc."
+      }
+    ],
+    "exampleType": "counting"
+  },
+  {
+    "id": "fingers",
+    "category": { "es": "Primeros numeros", "ca": "Primers nombres" },
+    "sortOrder": 3,
+    "title": { "es": "Contar con los dedos", "ca": "Comptar amb els dits" },
+    "summary": {
+      "es": "Tus dedos pueden ayudarte a ver los numeros.",
+      "ca": "Els dits et poden ajudar a veure els nombres."
+    },
+    "body": {
+      "es": "Levanta un dedo por cada numero. Los dedos ayudan a contar, sumar y restar.",
+      "ca": "Aixeca un dit per cada nombre. Els dits ajuden a comptar, sumar i restar."
+    },
+    "spokenText": {
+      "es": "Los dedos ayudan a contar, sumar y restar.",
+      "ca": "Els dits ajuden a comptar, sumar i restar."
+    },
+    "examples": [
+      {
+        "es": "Si levantas cinco dedos, has contado hasta 5.",
+        "ca": "Si aixeques cinc dits, has comptat fins a 5."
+      },
+      {
+        "es": "Para sumar 3 + 2, levanta 3 dedos y despues 2 mas.",
+        "ca": "Per sumar 3 + 2, aixeca 3 dits i despres 2 mes."
+      },
+      {
+        "es": "Para restar 5 - 2, levanta 5 dedos y baja 2.",
+        "ca": "Per restar 5 - 2, aixeca 5 dits i baixa'n 2."
+      }
+    ],
+    "exampleType": "fingers"
+  },
+  {
+    "id": "compare",
+    "category": { "es": "Primeros numeros", "ca": "Primers nombres" },
+    "sortOrder": 4,
+    "title": { "es": "Mas, menos e igual", "ca": "Mes, menys i igual" },
+    "summary": {
+      "es": "Compara dos grupos para saber cual tiene mas.",
+      "ca": "Compara dos grups per saber quin en te mes."
+    },
+    "body": {
+      "es": "Un grupo tiene mas si hay mas objetos. Tiene menos si hay menos. Son iguales si tienen la misma cantidad.",
+      "ca": "Un grup en te mes si hi ha mes objectes. En te menys si hi ha menys. Son iguals si tenen la mateixa quantitat."
+    },
+    "spokenText": {
+      "es": "Comparamos grupos: mas, menos o igual.",
+      "ca": "Comparem grups: mes, menys o igual."
+    },
+    "examples": [
+      {
+        "es": "5 estrellas son mas que 3 estrellas.",
+        "ca": "5 estrelles son mes que 3 estrelles."
+      },
+      {
+        "es": "2 corazones y 2 corazones son igual.",
+        "ca": "2 cors i 2 cors son igual."
+      },
+      {
+        "es": "1 nube es menos que 4 nubes.",
+        "ca": "1 nuvol es menys que 4 nuvols."
+      }
+    ],
+    "exampleType": "compare"
+  },
+  {
+    "id": "units",
+    "category": { "es": "Valor posicional", "ca": "Valor posicional" },
+    "sortOrder": 5,
+    "title": { "es": "Unidades", "ca": "Unitats" },
+    "summary": {
+      "es": "Una unidad es una cosa suelta.",
+      "ca": "Una unitat es una cosa sola."
+    },
+    "body": {
+      "es": "Las unidades cuentan de una en una. Son las piezas sueltas de un numero.",
+      "ca": "Les unitats compten d'una en una. Son les peces soles d'un nombre."
+    },
+    "spokenText": {
+      "es": "Una unidad es una cosa suelta.",
+      "ca": "Una unitat es una cosa sola."
+    },
+    "examples": [
+      {
+        "es": "6 unidades son 6 piezas sueltas.",
+        "ca": "6 unitats son 6 peces soles."
+      },
+      {
+        "es": "En el numero 14, el 4 son unidades.",
+        "ca": "En el nombre 14, el 4 son unitats."
+      },
+      {
+        "es": "Puedes imaginar 4 cubitos sueltos al lado de una barra de 10.",
+        "ca": "Pots imaginar 4 cubets sols al costat d'una barra de 10."
+      }
+    ],
+    "exampleType": "units"
+  },
+  {
+    "id": "tens",
+    "category": { "es": "Valor posicional", "ca": "Valor posicional" },
+    "sortOrder": 6,
+    "title": { "es": "Decenas", "ca": "Desenes" },
+    "summary": {
+      "es": "Una decena junta 10 unidades.",
+      "ca": "Una desena ajunta 10 unitats."
+    },
+    "body": {
+      "es": "Cuando tienes 10 unidades, puedes hacer una decena. Las decenas ayudan a contar mas rapido.",
+      "ca": "Quan tens 10 unitats, pots fer una desena. Les desenes ajuden a comptar mes rapid."
+    },
+    "spokenText": {
+      "es": "Una decena es un grupo de diez unidades.",
+      "ca": "Una desena es un grup de deu unitats."
+    },
+    "examples": [
+      {
+        "es": "El numero 14 tiene 1 decena y 4 unidades.",
+        "ca": "El nombre 14 te 1 desena i 4 unitats."
+      },
+      {
+        "es": "El numero 20 tiene 2 decenas y 0 unidades.",
+        "ca": "El nombre 20 te 2 desenes i 0 unitats."
+      },
+      {
+        "es": "Puedes contar decenas asi: 10, 20, 30.",
+        "ca": "Pots comptar desenes aixi: 10, 20, 30."
+      }
+    ],
+    "exampleType": "tens"
+  },
+  {
+    "id": "hundreds",
+    "category": { "es": "Valor posicional", "ca": "Valor posicional" },
+    "sortOrder": 7,
+    "title": { "es": "Centenas", "ca": "Centenes" },
+    "summary": {
+      "es": "Una centena junta 100 unidades.",
+      "ca": "Una centena ajunta 100 unitats."
+    },
+    "body": {
+      "es": "Una centena es como 10 decenas juntas, o 100 unidades. Nos ayuda con numeros grandes.",
+      "ca": "Una centena es com 10 desenes juntes, o 100 unitats. Ens ajuda amb nombres grans."
+    },
+    "spokenText": {
+      "es": "Una centena son cien unidades, o diez decenas juntas.",
+      "ca": "Una centena son cent unitats, o deu desenes juntes."
+    },
+    "examples": [
+      {
+        "es": "123 tiene 1 centena, 2 decenas y 3 unidades.",
+        "ca": "123 te 1 centena, 2 desenes i 3 unitats."
+      },
+      {
+        "es": "200 son 2 centenas.",
+        "ca": "200 son 2 centenes."
+      },
+      {
+        "es": "100 unidades juntas forman 1 centena.",
+        "ca": "100 unitats juntes formen 1 centena."
+      }
+    ],
+    "exampleType": "hundreds"
+  },
+  {
+    "id": "place_value",
+    "category": { "es": "Valor posicional", "ca": "Valor posicional" },
+    "sortOrder": 8,
+    "title": { "es": "Separar numeros", "ca": "Separar nombres" },
+    "summary": {
+      "es": "Puedes separar un numero en decenas y unidades.",
+      "ca": "Pots separar un nombre en desenes i unitats."
+    },
+    "body": {
+      "es": "Separar numeros ayuda a sumar y restar con calma. Primero miras las decenas y despues las unidades.",
+      "ca": "Separar nombres ajuda a sumar i restar amb calma. Primer mires les desenes i despres les unitats."
+    },
+    "spokenText": {
+      "es": "Separar numeros ayuda mucho.",
+      "ca": "Separar nombres ajuda molt."
+    },
+    "examples": [
+      {
+        "es": "17 se puede separar en 10 y 7.",
+        "ca": "17 es pot separar en 10 i 7."
+      },
+      {
+        "es": "24 se puede separar en 20 y 4.",
+        "ca": "24 es pot separar en 20 i 4."
+      },
+      {
+        "es": "38 se puede separar en 30 y 8.",
+        "ca": "38 es pot separar en 30 i 8."
+      }
+    ],
+    "exampleType": "place_value"
+  },
+  {
+    "id": "addition",
+    "category": { "es": "Sumar", "ca": "Sumar" },
+    "sortOrder": 9,
+    "title": { "es": "Que es sumar", "ca": "Que es sumar" },
+    "summary": {
+      "es": "Sumar es juntar grupos.",
+      "ca": "Sumar es ajuntar grups."
+    },
+    "body": {
+      "es": "Sumar casi siempre significa juntar o avanzar.",
+      "ca": "Sumar gairebe sempre vol dir ajuntar o avancar."
+    },
+    "spokenText": {
+      "es": "Sumar significa juntar o avanzar.",
+      "ca": "Sumar vol dir ajuntar o avancar."
+    },
+    "examples": [
+      {
+        "es": "Si tienes 3 estrellas y llegan 2 mas, 3 + 2 son 5.",
+        "ca": "Si tens 3 estrelles i n'arriben 2 mes, 3 + 2 son 5."
+      },
+      {
+        "es": "Si tienes 4 corazones y recibes 1 mas, ahora tienes 5.",
+        "ca": "Si tens 4 cors i en reps 1 mes, ara en tens 5."
+      },
+      {
+        "es": "En una recta de numeros, sumar 2 es avanzar 2 pasos.",
+        "ca": "En una recta de nombres, sumar 2 es avancar 2 passos."
+      }
+    ],
+    "exampleType": "addition"
+  },
+  {
+    "id": "addition_vertical",
+    "category": { "es": "Sumar", "ca": "Sumar" },
+    "sortOrder": 10,
+    "title": { "es": "Suma en columna", "ca": "Suma en columna" },
+    "summary": {
+      "es": "Pon unidades debajo de unidades.",
+      "ca": "Posa unitats sota unitats."
+    },
+    "body": {
+      "es": "Cuando los numeros son grandes, se pueden colocar uno debajo de otro. Asi las cifras quedan ordenadas.",
+      "ca": "Quan els nombres son grans, es poden posar un sota l'altre. Aixi les xifres queden ordenades."
+    },
+    "spokenText": {
+      "es": "En una suma en columna, ponemos unidades debajo de unidades.",
+      "ca": "En una suma en columna, posem unitats sota unitats."
+    },
+    "examples": [
+      {
+        "es": "En 12 + 7, el 7 va debajo de las unidades.",
+        "ca": "En 12 + 7, el 7 va sota les unitats."
+      },
+      {
+        "es": "En 24 + 13, el 4 y el 3 van en la columna de unidades.",
+        "ca": "En 24 + 13, el 4 i el 3 van a la columna d'unitats."
+      },
+      {
+        "es": "Primero mira las unidades y despues las decenas.",
+        "ca": "Primer mira les unitats i despres les desenes."
+      }
+    ],
+    "exampleType": "addition_vertical"
+  },
+  {
+    "id": "subtraction",
+    "category": { "es": "Restar", "ca": "Restar" },
+    "sortOrder": 11,
+    "title": { "es": "Que es restar", "ca": "Que es restar" },
+    "summary": {
+      "es": "Restar es quitar o ver cuanto queda.",
+      "ca": "Restar es treure o veure quant queda."
+    },
+    "body": {
+      "es": "Restar puede ser quitar, retroceder o descubrir cuanto falta.",
+      "ca": "Restar pot ser treure, retrocedir o descobrir quant falta."
+    },
+    "spokenText": {
+      "es": "Restar significa quitar o retroceder.",
+      "ca": "Restar vol dir treure o retrocedir."
+    },
+    "examples": [
+      {
+        "es": "Si tienes 5 corazones y quitas 2, 5 - 2 son 3.",
+        "ca": "Si tens 5 cors i en treus 2, 5 - 2 son 3."
+      },
+      {
+        "es": "Si hay 8 estrellas y se van 3, quedan 5.",
+        "ca": "Si hi ha 8 estrelles i se'n van 3, en queden 5."
+      },
+      {
+        "es": "En una recta de numeros, restar 2 es retroceder 2 pasos.",
+        "ca": "En una recta de nombres, restar 2 es retrocedir 2 passos."
+      }
+    ],
+    "exampleType": "subtraction"
+  },
+  {
+    "id": "subtraction_vertical",
+    "category": { "es": "Restar", "ca": "Restar" },
+    "sortOrder": 12,
+    "title": { "es": "Resta en columna", "ca": "Resta en columna" },
+    "summary": {
+      "es": "Ordena las cifras antes de restar.",
+      "ca": "Ordena les xifres abans de restar."
+    },
+    "body": {
+      "es": "En una resta en columna, el numero grande va arriba. Despues quitamos el numero de abajo.",
+      "ca": "En una resta en columna, el nombre gran va a dalt. Despres traiem el nombre de baix."
+    },
+    "spokenText": {
+      "es": "En una resta en columna, el numero grande va arriba y el que quitamos va debajo.",
+      "ca": "En una resta en columna, el nombre gran va a dalt i el que traiem va a sota."
+    },
+    "examples": [
+      {
+        "es": "En 15 - 4, el 4 va debajo de las unidades.",
+        "ca": "En 15 - 4, el 4 va sota les unitats."
+      },
+      {
+        "es": "Primero restas unidades: 5 - 4.",
+        "ca": "Primer restes unitats: 5 - 4."
+      },
+      {
+        "es": "En 28 - 13, las decenas van debajo de decenas y las unidades debajo de unidades.",
+        "ca": "En 28 - 13, les desenes van sota desenes i les unitats sota unitats."
+      }
+    ],
+    "exampleType": "subtraction_vertical"
+  },
+  {
+    "id": "multiplication",
+    "category": { "es": "Multiplicar", "ca": "Multiplicar" },
+    "sortOrder": 13,
+    "title": { "es": "Grupos iguales", "ca": "Grups iguals" },
+    "summary": {
+      "es": "Multiplicar es hacer varios grupos iguales.",
+      "ca": "Multiplicar es fer diversos grups iguals."
+    },
+    "body": {
+      "es": "Multiplicar ayuda cuando los grupos son iguales. Es como sumar la misma cantidad varias veces.",
+      "ca": "Multiplicar ajuda quan els grups son iguals. Es com sumar la mateixa quantitat diverses vegades."
+    },
+    "spokenText": {
+      "es": "Multiplicar es juntar grupos iguales.",
+      "ca": "Multiplicar es ajuntar grups iguals."
+    },
+    "examples": [
+      {
+        "es": "3 grupos con 2 estrellas son 2 + 2 + 2.",
+        "ca": "3 grups amb 2 estrelles son 2 + 2 + 2."
+      },
+      {
+        "es": "4 grupos de 3 son 3 + 3 + 3 + 3.",
+        "ca": "4 grups de 3 son 3 + 3 + 3 + 3."
+      },
+      {
+        "es": "2 cajas con 5 galletas cada una hacen 10 galletas.",
+        "ca": "2 caixes amb 5 galetes cadascuna fan 10 galetes."
+      }
+    ],
+    "exampleType": "multiplication"
+  },
+  {
+    "id": "division",
+    "category": { "es": "Dividir", "ca": "Dividir" },
+    "sortOrder": 14,
+    "title": { "es": "Repartir en partes iguales", "ca": "Repartir en parts iguals" },
+    "summary": {
+      "es": "Dividir es repartir para que todos tengan lo mismo.",
+      "ca": "Dividir es repartir perque tothom tingui el mateix."
+    },
+    "body": {
+      "es": "Dividir es repartir de forma justa en partes iguales.",
+      "ca": "Dividir es repartir de manera justa en parts iguals."
+    },
+    "spokenText": {
+      "es": "Dividir es repartir en partes iguales.",
+      "ca": "Dividir es repartir en parts iguals."
+    },
+    "examples": [
+      {
+        "es": "Si repartes 6 estrellas en 3 cajas, cada caja recibe 2 estrellas.",
+        "ca": "Si reparteixes 6 estrelles en 3 caixes, cada caixa rep 2 estrelles."
+      },
+      {
+        "es": "Si repartes 8 galletas entre 4 amigos, cada amigo recibe 2.",
+        "ca": "Si reparteixes 8 galetes entre 4 amics, cada amic en rep 2."
+      },
+      {
+        "es": "Si 10 pegatinas se reparten entre 2 ninos, cada uno recibe 5.",
+        "ca": "Si 10 adhesius es reparteixen entre 2 nens, cadascu en rep 5."
+      }
+    ],
+    "exampleType": "division"
   }
 ]
