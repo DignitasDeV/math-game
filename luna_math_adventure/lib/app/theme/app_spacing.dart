@@ -17,6 +17,7 @@ class AppSpacing {
 class AppBreakpoints {
   const AppBreakpoints._();
 
+  static const narrowWidth = 520.0;
   static const compactHeight = 640.0;
   static const tabletWidth = 700.0;
   static const contentMaxWidth = 720.0;

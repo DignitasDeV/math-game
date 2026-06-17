@@ -5,13 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/exercise.dart';
 import '../../models/exercise_template.dart';
 import '../../models/level_config.dart';
-import '../../models/operation_candidate.dart';
+import '../../models/unicorn_avatar_stage.dart';
 import '../../models/visual_item.dart';
 import '../../services/content_repository.dart';
 import '../../services/exercise_generator.dart';
-import '../../services/exercise_pool_generator.dart';
+import '../../services/exercise_session_planner.dart';
 import '../../services/profile_controller.dart';
 import '../../services/progress_repository.dart';
+import '../../services/unicorn_evolution_rules.dart';
 
 class GameSessionState {
   const GameSessionState({
@@ -23,9 +24,11 @@ class GameSessionState {
     this.isCorrect,
     this.isComplete = false,
     this.hasAskedHint = false,
+    this.hintStepIndex = -1,
     this.isAdvancing = false,
     this.starsEarned = 0,
     this.newRewardId,
+    this.newUnicornStage,
     this.nextLevelId,
   });
 
@@ -37,9 +40,11 @@ class GameSessionState {
   final bool? isCorrect;
   final bool isComplete;
   final bool hasAskedHint;
+  final int hintStepIndex;
   final bool isAdvancing;
   final int starsEarned;
   final String? newRewardId;
+  final UnicornAvatarStage? newUnicornStage;
   final String? nextLevelId;
 
   int get questionsToComplete => level.questionsToComplete;
@@ -53,9 +58,11 @@ class GameSessionState {
     bool clearAnswer = false,
     bool? isComplete,
     bool? hasAskedHint,
+    int? hintStepIndex,
     bool? isAdvancing,
     int? starsEarned,
     String? newRewardId,
+    UnicornAvatarStage? newUnicornStage,
     String? nextLevelId,
   }) {
     return GameSessionState(
@@ -63,41 +70,40 @@ class GameSessionState {
       exercise: exercise ?? this.exercise,
       questionIndex: questionIndex ?? this.questionIndex,
       correctAnswers: correctAnswers ?? this.correctAnswers,
-      selectedAnswer: clearAnswer ? null : selectedAnswer ?? this.selectedAnswer,
+      selectedAnswer:
+          clearAnswer ? null : selectedAnswer ?? this.selectedAnswer,
       isCorrect: clearAnswer ? null : isCorrect ?? this.isCorrect,
       isComplete: isComplete ?? this.isComplete,
       hasAskedHint: clearAnswer ? false : hasAskedHint ?? this.hasAskedHint,
+      hintStepIndex: clearAnswer ? -1 : hintStepIndex ?? this.hintStepIndex,
       isAdvancing: isAdvancing ?? this.isAdvancing,
       starsEarned: starsEarned ?? this.starsEarned,
       newRewardId: newRewardId ?? this.newRewardId,
+      newUnicornStage: newUnicornStage ?? this.newUnicornStage,
       nextLevelId: nextLevelId ?? this.nextLevelId,
     );
   }
 }
 
-final gameSessionProvider = StateNotifierProvider.family<
-    GameSessionController,
-    AsyncValue<GameSessionState>,
-    String>((ref, levelId) {
+final gameSessionProvider = StateNotifierProvider.family<GameSessionController,
+    AsyncValue<GameSessionState>, String>((ref, levelId) {
   final controller = GameSessionController(ref, levelId);
   controller.load();
   return controller;
 });
 
-class GameSessionController extends StateNotifier<AsyncValue<GameSessionState>> {
+class GameSessionController
+    extends StateNotifier<AsyncValue<GameSessionState>> {
   GameSessionController(this._ref, this._levelId)
       : super(const AsyncValue.loading());
 
   final Ref _ref;
   final String _levelId;
-  final _random = Random();
-  final _poolGenerator = const ExercisePoolGenerator();
-  final _recentKeys = <String>[];
 
   late LevelConfig _level;
   late List<ExerciseTemplate> _templates;
   late List<VisualItem> _visualItems;
-  late List<OperationCandidate> _pool;
+  late ExerciseSessionPlanner _planner;
 
   Future<void> load() async {
     try {
@@ -110,7 +116,7 @@ class GameSessionController extends StateNotifier<AsyncValue<GameSessionState>> 
       _level = level;
       _templates = await content.loadExerciseTemplates();
       _visualItems = await content.loadVisualItems();
-      _pool = _createShuffledPool();
+      _planner = ExerciseSessionPlanner(level: _level);
 
       state = AsyncValue.data(
         GameSessionState(
@@ -126,14 +132,15 @@ class GameSessionController extends StateNotifier<AsyncValue<GameSessionState>> 
   }
 
   Future<void> repeatLevel() async {
-    _recentKeys.clear();
     state = const AsyncValue.loading();
     await load();
   }
 
   void submitAnswer(int answer) {
     final current = state.valueOrNull;
-    if (current == null || current.selectedAnswer != null || current.isComplete) {
+    if (current == null ||
+        current.selectedAnswer != null ||
+        current.isComplete) {
       return;
     }
 
@@ -142,9 +149,8 @@ class GameSessionController extends StateNotifier<AsyncValue<GameSessionState>> 
       current.copyWith(
         selectedAnswer: answer,
         isCorrect: isCorrect,
-        correctAnswers: isCorrect
-            ? current.correctAnswers + 1
-            : current.correctAnswers,
+        correctAnswers:
+            isCorrect ? current.correctAnswers + 1 : current.correctAnswers,
       ),
     );
   }
@@ -158,7 +164,26 @@ class GameSessionController extends StateNotifier<AsyncValue<GameSessionState>> 
       return;
     }
 
-    state = AsyncValue.data(current.copyWith(hasAskedHint: true));
+    state = AsyncValue.data(
+      current.copyWith(
+        hasAskedHint: true,
+        hintStepIndex: _nextHintStepIndex(current),
+      ),
+    );
+  }
+
+  int _nextHintStepIndex(GameSessionState current) {
+    final stepCount = current.exercise.hintSteps.length;
+    if (stepCount <= 1) {
+      return 0;
+    }
+
+    if (!current.hasAskedHint || current.hintStepIndex < 0) {
+      return 0;
+    }
+
+    final nextIndex = current.hintStepIndex + 1;
+    return nextIndex >= stepCount ? stepCount - 1 : nextIndex;
   }
 
   Future<void> nextExercise() async {
@@ -181,6 +206,7 @@ class GameSessionController extends StateNotifier<AsyncValue<GameSessionState>> 
             isAdvancing: false,
             starsEarned: result.starsEarned,
             newRewardId: result.newRewardId,
+            newUnicornStage: result.newUnicornStage,
             nextLevelId: result.nextLevelId,
           ),
         );
@@ -200,27 +226,8 @@ class GameSessionController extends StateNotifier<AsyncValue<GameSessionState>> 
     }
   }
 
-  List<OperationCandidate> _createShuffledPool() {
-    final pool = _poolGenerator.generate(_level);
-    pool.shuffle(_random);
-    return pool;
-  }
-
   Exercise _nextExercise() {
-    if (_pool.isEmpty) {
-      _pool = _createShuffledPool();
-    }
-
-    var candidateIndex = _pool.indexWhere(
-      (candidate) => !_recentKeys.contains(candidate.key),
-    );
-    if (candidateIndex == -1) {
-      _recentKeys.clear();
-      candidateIndex = 0;
-    }
-
-    final candidate = _pool.removeAt(candidateIndex);
-    _markRecent(candidate);
+    final candidate = _planner.next();
 
     return _ref.read(exerciseGeneratorProvider).buildExercise(
           level: _level,
@@ -231,14 +238,8 @@ class GameSessionController extends StateNotifier<AsyncValue<GameSessionState>> 
         );
   }
 
-  void _markRecent(OperationCandidate candidate) {
-    _recentKeys.add(candidate.key);
-    if (_recentKeys.length > 10) {
-      _recentKeys.removeAt(0);
-    }
-  }
-
-  Future<_LevelCompletionResult> _completeLevel(GameSessionState current) async {
+  Future<_LevelCompletionResult> _completeLevel(
+      GameSessionState current) async {
     final profile = _ref.read(activeProfileProvider);
     if (profile == null) {
       return _LevelCompletionResult(
@@ -288,19 +289,34 @@ class GameSessionController extends StateNotifier<AsyncValue<GameSessionState>> 
       unlockedNextLevelId = nextLevel.id;
     }
 
-    final nextProgress = progress.copyWith(
+    final progressWithUnlockedLevels = progress.copyWith(
       unlockedLevelIds: unlockedLevelIds.toList(growable: false),
       completedLevelIds: completedLevelIds.toList(growable: false),
       starsByLevel: starsByLevel,
       lastLevelId: unlockedNextLevelId ?? _level.id,
       earnedRewardIds: earnedRewardIds.toList(growable: false),
     );
+    final unlockedUnicornStage = unlockedUnicornStageForProgress(
+      progress: progressWithUnlockedLevels,
+      levels: levels,
+    );
+    final newUnicornStage = newlyUnlockedUnicornStage(
+      previousProgress: progress,
+      nextProgress: progressWithUnlockedLevels,
+      levels: levels,
+    );
+
+    final nextProgress = progressWithUnlockedLevels.copyWith(
+      unlockedUnicornStageId: unlockedUnicornStage.id,
+    );
 
     await repository.saveProgress(nextProgress);
+    _ref.invalidate(profileProgressProvider(profile.id));
     _ref.invalidate(activeProgressProvider);
     return _LevelCompletionResult(
       starsEarned: stars,
       newRewardId: newRewardId,
+      newUnicornStage: newUnicornStage,
       nextLevelId: unlockedNextLevelId,
     );
   }
@@ -339,10 +355,12 @@ class _LevelCompletionResult {
   const _LevelCompletionResult({
     required this.starsEarned,
     this.newRewardId,
+    this.newUnicornStage,
     this.nextLevelId,
   });
 
   final int starsEarned;
   final String? newRewardId;
+  final UnicornAvatarStage? newUnicornStage;
   final String? nextLevelId;
 }

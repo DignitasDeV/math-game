@@ -1,4 +1,5 @@
 import '../models/unicorn_avatar.dart';
+import '../models/unicorn_avatar_stage.dart';
 
 enum UnicornAvatarEmotion {
   idle,
@@ -6,14 +7,6 @@ enum UnicornAvatarEmotion {
   thinking,
   encouraging,
   celebrating,
-}
-
-enum UnicornAvatarStage {
-  stage01('stage_01');
-
-  const UnicornAvatarStage(this.assetPrefix);
-
-  final String assetPrefix;
 }
 
 const unicornAvatarFallback = UnicornAvatar.avatar01;
@@ -32,35 +25,60 @@ List<String> unicornAvatarAssetFallbackPaths({
   required UnicornAvatarEmotion emotion,
   UnicornAvatarStage stage = UnicornAvatarStage.stage01,
 }) {
-  final selectedPath = unicornAvatarAssetPath(
-    avatar: avatar,
-    emotion: emotion,
-    stage: stage,
-  );
-  final selectedIdlePath = unicornAvatarAssetPath(
-    avatar: avatar,
-    emotion: UnicornAvatarEmotion.idle,
-    stage: stage,
-  );
-  final fallbackPath = unicornAvatarAssetPath(
-    avatar: unicornAvatarFallback,
-    emotion: emotion,
-    stage: stage,
-  );
-  final fallbackIdlePath = unicornAvatarAssetPath(
-    avatar: unicornAvatarFallback,
-    emotion: UnicornAvatarEmotion.idle,
-    stage: stage,
-  );
+  final paths = <String>[];
 
-  return [
-    selectedPath,
-    if (selectedIdlePath != selectedPath) selectedIdlePath,
-    if (fallbackPath != selectedPath && fallbackPath != selectedIdlePath)
-      fallbackPath,
-    if (fallbackIdlePath != selectedPath &&
-        fallbackIdlePath != selectedIdlePath &&
-        fallbackIdlePath != fallbackPath)
-      fallbackIdlePath,
-  ];
+  void addPath({
+    required UnicornAvatar candidateAvatar,
+    required UnicornAvatarEmotion candidateEmotion,
+    required UnicornAvatarStage candidateStage,
+  }) {
+    final path = unicornAvatarAssetPath(
+      avatar: candidateAvatar,
+      emotion: candidateEmotion,
+      stage: candidateStage,
+    );
+    if (!paths.contains(path)) {
+      paths.add(path);
+    }
+  }
+
+  for (final candidateStage in _fallbackStages(stage)) {
+    addPath(
+      candidateAvatar: avatar,
+      candidateEmotion: emotion,
+      candidateStage: candidateStage,
+    );
+    if (emotion != UnicornAvatarEmotion.idle) {
+      addPath(
+        candidateAvatar: avatar,
+        candidateEmotion: UnicornAvatarEmotion.idle,
+        candidateStage: candidateStage,
+      );
+    }
+  }
+
+  for (final candidateStage in _fallbackStages(stage)) {
+    addPath(
+      candidateAvatar: unicornAvatarFallback,
+      candidateEmotion: emotion,
+      candidateStage: candidateStage,
+    );
+    if (emotion != UnicornAvatarEmotion.idle) {
+      addPath(
+        candidateAvatar: unicornAvatarFallback,
+        candidateEmotion: UnicornAvatarEmotion.idle,
+        candidateStage: candidateStage,
+      );
+    }
+  }
+
+  return paths;
+}
+
+List<UnicornAvatarStage> _fallbackStages(UnicornAvatarStage stage) {
+  return UnicornAvatarStage.values
+      .where((candidate) => candidate.index <= stage.index)
+      .toList(growable: false)
+      .reversed
+      .toList(growable: false);
 }

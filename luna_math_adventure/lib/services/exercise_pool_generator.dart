@@ -49,7 +49,7 @@ class ExercisePoolGenerator {
         if (level.maxResult != null && result > level.maxResult!) {
           continue;
         }
-        if (!level.allowCarry && left >= 10 && (left % 10) + (right % 10) >= 10) {
+        if (!level.allowCarry && _requiresCarry(left, right)) {
           continue;
         }
 
@@ -61,6 +61,11 @@ class ExercisePoolGenerator {
         );
       }
     }
+  }
+
+  bool _requiresCarry(int left, int right) {
+    final hasTens = left >= 10 || right >= 10;
+    return hasTens && (left % 10) + (right % 10) >= 10;
   }
 
   Iterable<OperationCandidate> _generateSubtraction(LevelConfig level) sync* {

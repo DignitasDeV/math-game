@@ -60,14 +60,14 @@
       "es": {
         "visible": "{a} tiene {tens} {tensLabel}. ¿Cuántas unidades sueltas tiene?",
         "spoken": "{aWords} tiene {tensWords} {tensLabel}. ¿Cuántas unidades sueltas tiene?",
-        "hint": "Separa {a} en decenas y unidades. Mira el número de la derecha.",
-        "spokenHint": "Separa {aWords} en decenas y unidades. Mira el número de la derecha."
+        "hint": "Mira {a}: el {tens} marca las decenas y el {units} marca las unidades.",
+        "spokenHint": "Mira {a}: el {tens} marca las decenas y el {units} marca las unidades."
       },
       "ca": {
         "visible": "{a} té {tens} {tensLabel}. Quantes unitats soltes té?",
         "spoken": "{aWords} té {tensWords} {tensLabel}. Quantes unitats soltes té?",
-        "hint": "Separa {a} en desenes i unitats. Mira el número de la dreta.",
-        "spokenHint": "Separa {aWords} en desenes i unitats. Mira el número de la dreta."
+        "hint": "Mira {a}: el {tens} marca les desenes i el {units} marca les unitats.",
+        "spokenHint": "Mira {a}: el {tens} marca les desenes i el {units} marca les unitats."
       }
     }
   }

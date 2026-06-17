@@ -100,7 +100,7 @@ class _SplashContent extends StatelessWidget {
               curve: Curves.elasticOut,
             ),
         const SizedBox(height: AppSpacing.xl),
-        Text(
+        const Text(
           'Luna Math\nAdventure',
           textAlign: TextAlign.center,
           style: AppTypography.display,

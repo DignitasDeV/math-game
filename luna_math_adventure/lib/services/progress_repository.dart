@@ -43,13 +43,16 @@ final progressRepositoryProvider = Provider<ProgressRepository>((ref) {
   return SharedPreferencesProgressRepository();
 });
 
+final profileProgressProvider =
+    FutureProvider.family<PlayerProgress, String>((ref, profileId) async {
+  return ref.watch(progressRepositoryProvider).loadProgress(profileId);
+});
+
 final activeProgressProvider = FutureProvider<PlayerProgress?>((ref) async {
   final activeProfile = ref.watch(activeProfileProvider);
   if (activeProfile == null) {
     return null;
   }
 
-  return ref
-      .watch(progressRepositoryProvider)
-      .loadProgress(activeProfile.id);
+  return ref.watch(profileProgressProvider(activeProfile.id).future);
 });

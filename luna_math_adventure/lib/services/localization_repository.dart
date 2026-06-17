@@ -7,7 +7,8 @@ abstract class LocalizationRepository {
 
 class AssetLocalizationRepository implements LocalizationRepository {
   @override
-  Future<Map<String, String>> loadVisibleTexts(AppLanguage language) async => {};
+  Future<Map<String, String>> loadVisibleTexts(AppLanguage language) async =>
+      {};
 
   @override
   Future<Map<String, String>> loadSpokenTexts(AppLanguage language) async => {};

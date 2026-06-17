@@ -20,7 +20,8 @@ class VisualItem {
   final LocalizedText gender;
 
   static VisualItem fromJson(Map<String, Object?> json) {
-    final labels = Map<String, Object?>.from(json['labels'] as Map? ?? const {});
+    final labels =
+        Map<String, Object?>.from(json['labels'] as Map? ?? const {});
     final es = Map<String, Object?>.from(labels['es'] as Map? ?? const {});
     final ca = Map<String, Object?>.from(labels['ca'] as Map? ?? const {});
 

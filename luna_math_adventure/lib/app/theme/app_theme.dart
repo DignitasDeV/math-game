@@ -88,7 +88,8 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_buttonRadius),
           borderSide: const BorderSide(color: AppColors.softLilac),
@@ -99,7 +100,8 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_buttonRadius),
-          borderSide: const BorderSide(color: AppColors.lilacAccent, width: 2.5),
+          borderSide:
+              const BorderSide(color: AppColors.lilacAccent, width: 2.5),
         ),
         labelStyle: AppTypography.input,
         hintStyle: AppTypography.helper,

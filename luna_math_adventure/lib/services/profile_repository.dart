@@ -48,7 +48,8 @@ class SharedPreferencesProfileRepository implements ProfileRepository {
       return FamilyProfiles.empty;
     }
 
-    final legacyJson = Map<String, Object?>.from(jsonDecode(legacyValue) as Map);
+    final legacyJson =
+        Map<String, Object?>.from(jsonDecode(legacyValue) as Map);
     final legacyProfile = PlayerProfile.fromJson(legacyJson).copyWith(
       id: legacyJson['id'] as String? ?? _createProfileId(),
     );
@@ -64,7 +65,8 @@ class SharedPreferencesProfileRepository implements ProfileRepository {
   @override
   Future<void> saveFamily(FamilyProfiles family) async {
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_familyProfilesKey, jsonEncode(family.toJson()));
+    await preferences.setString(
+        _familyProfilesKey, jsonEncode(family.toJson()));
   }
 
   @override

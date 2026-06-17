@@ -1,3 +1,5 @@
+import 'unicorn_avatar_stage.dart';
+
 class PlayerProgress {
   const PlayerProgress({
     required this.profileId,
@@ -6,6 +8,7 @@ class PlayerProgress {
     required this.starsByLevel,
     required this.lastLevelId,
     required this.earnedRewardIds,
+    required this.unlockedUnicornStageId,
   });
 
   final String profileId;
@@ -14,6 +17,10 @@ class PlayerProgress {
   final Map<String, int> starsByLevel;
   final String lastLevelId;
   final List<String> earnedRewardIds;
+  final String unlockedUnicornStageId;
+
+  UnicornAvatarStage get unlockedUnicornStage =>
+      UnicornAvatarStage.fromId(unlockedUnicornStageId);
 
   PlayerProgress copyWith({
     List<String>? unlockedLevelIds,
@@ -21,6 +28,7 @@ class PlayerProgress {
     Map<String, int>? starsByLevel,
     String? lastLevelId,
     List<String>? earnedRewardIds,
+    String? unlockedUnicornStageId,
   }) {
     return PlayerProgress(
       profileId: profileId,
@@ -29,6 +37,8 @@ class PlayerProgress {
       starsByLevel: starsByLevel ?? this.starsByLevel,
       lastLevelId: lastLevelId ?? this.lastLevelId,
       earnedRewardIds: earnedRewardIds ?? this.earnedRewardIds,
+      unlockedUnicornStageId:
+          unlockedUnicornStageId ?? this.unlockedUnicornStageId,
     );
   }
 
@@ -40,6 +50,7 @@ class PlayerProgress {
       starsByLevel: const {},
       lastLevelId: 'heart_forest_01',
       earnedRewardIds: const [],
+      unlockedUnicornStageId: UnicornAvatarStage.stage01.id,
     );
   }
 
@@ -51,6 +62,7 @@ class PlayerProgress {
       'starsByLevel': starsByLevel,
       'lastLevelId': lastLevelId,
       'earnedRewardIds': earnedRewardIds,
+      'unlockedUnicornStageId': unlockedUnicornStageId,
     };
   }
 
@@ -69,8 +81,15 @@ class PlayerProgress {
         json['lastLevelId'] as String? ?? 'heart_forest_01',
       ),
       earnedRewardIds: _readStringList(json['earnedRewardIds']),
+      unlockedUnicornStageId: _normalizeUnicornStageId(
+        json['unlockedUnicornStageId'] as String?,
+      ),
     );
   }
+}
+
+String _normalizeUnicornStageId(String? stageId) {
+  return UnicornAvatarStage.fromId(stageId).id;
 }
 
 List<String> _readStringList(Object? value) {

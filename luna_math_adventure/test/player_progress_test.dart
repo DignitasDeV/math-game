@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luna_math_adventure/models/player_progress.dart';
+import 'package:luna_math_adventure/models/unicorn_avatar_stage.dart';
 
 void main() {
   test('normalizes legacy level ids without duplicates', () {
@@ -32,6 +33,7 @@ void main() {
       'heart_forest_03': 3,
     });
     expect(progress.lastLevelId, 'heart_forest_03');
+    expect(progress.unlockedUnicornStage, UnicornAvatarStage.stage01);
   });
 
   test('keeps first heart forest level unlocked for empty progress', () {
@@ -41,5 +43,31 @@ void main() {
     });
 
     expect(progress.unlockedLevelIds, ['heart_forest_01']);
+  });
+
+  test('initial progress starts with unicorn stage 01', () {
+    final progress = PlayerProgress.initial('profile_1');
+
+    expect(progress.unlockedUnicornStageId, 'stage_01');
+    expect(progress.unlockedUnicornStage, UnicornAvatarStage.stage01);
+  });
+
+  test('persists unlocked unicorn stage id', () {
+    final progress = PlayerProgress.initial('profile_1').copyWith(
+      unlockedUnicornStageId: UnicornAvatarStage.stage03.id,
+    );
+
+    final restored = PlayerProgress.fromJson(progress.toJson());
+
+    expect(restored.unlockedUnicornStage, UnicornAvatarStage.stage03);
+  });
+
+  test('old progress without unicorn stage migrates to stage 01', () {
+    final progress = PlayerProgress.fromJson({
+      'profileId': 'profile_1',
+      'unlockedLevelIds': ['heart_forest_01'],
+    });
+
+    expect(progress.unlockedUnicornStage, UnicornAvatarStage.stage01);
   });
 }

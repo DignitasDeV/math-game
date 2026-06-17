@@ -9,16 +9,19 @@ import '../../app/theme/app_motion.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
 import '../../services/audio_service.dart';
+import '../../services/ui_copy.dart';
 
 class QuickNavigationFab extends StatefulWidget {
   const QuickNavigationFab({
     required this.currentPath,
     required this.canPop,
+    required this.languageCode,
     super.key,
   });
 
   final String currentPath;
   final bool canPop;
+  final String languageCode;
 
   @override
   State<QuickNavigationFab> createState() => _QuickNavigationFabState();
@@ -26,13 +29,23 @@ class QuickNavigationFab extends StatefulWidget {
 
 class _QuickNavigationFabState extends State<QuickNavigationFab> {
   var _isOpen = false;
+  var _isDocked = true;
+  var _dockAfterClose = false;
 
   @override
   Widget build(BuildContext context) {
-    final actions = _actionsFor(widget.currentPath, widget.canPop);
+    final actions = _actionsFor(
+      widget.currentPath,
+      widget.canPop,
+      widget.languageCode,
+    );
     final isExercisePath = _isExercisePath(widget.currentPath);
     final bottomOffset = isExercisePath ? 96.0 : AppSpacing.lg;
     final mainButtonSize = isExercisePath ? 52.0 : 58.0;
+    final dockedVisibleWidth = mainButtonSize * 0.42;
+    final isDockedClosed = _isDocked && !_isOpen;
+    final rightOffset =
+        isDockedClosed ? -(mainButtonSize - dockedVisibleWidth) : AppSpacing.lg;
 
     return Stack(
       fit: StackFit.expand,
@@ -41,15 +54,17 @@ class _QuickNavigationFabState extends State<QuickNavigationFab> {
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: () => setState(() => _isOpen = false),
+              onTap: _closeMenu,
             ),
           ),
-        Positioned(
-          right: AppSpacing.lg,
+        AnimatedPositioned(
+          duration: AppMotion.normal,
+          curve: AppMotion.emphasized,
+          right: rightOffset,
           bottom: bottomOffset,
           child: SafeArea(
-            minimum: const EdgeInsets.only(
-              right: AppSpacing.xs,
+            minimum: EdgeInsets.only(
+              right: isDockedClosed ? 0 : AppSpacing.xs,
               bottom: AppSpacing.xs,
             ),
             child: Column(
@@ -84,8 +99,11 @@ class _QuickNavigationFabState extends State<QuickNavigationFab> {
                 const SizedBox(height: AppSpacing.sm),
                 _QuickNavigationMainButton(
                   isOpen: _isOpen,
+                  isDocked: isDockedClosed,
+                  languageCode: widget.languageCode,
                   size: mainButtonSize,
-                  onPressed: () => setState(() => _isOpen = !_isOpen),
+                  onPressed: _toggleMenu,
+                  onDoubleTap: _toggleDock,
                 ),
               ],
             ),
@@ -95,11 +113,52 @@ class _QuickNavigationFabState extends State<QuickNavigationFab> {
     );
   }
 
+  void _toggleMenu() {
+    setState(() {
+      if (_isOpen) {
+        _isOpen = false;
+        _restoreDockAfterClose();
+        return;
+      }
+
+      if (_isDocked) {
+        _isDocked = false;
+        _dockAfterClose = true;
+      }
+
+      _isOpen = true;
+    });
+  }
+
+  void _closeMenu() {
+    setState(() {
+      _isOpen = false;
+      _restoreDockAfterClose();
+    });
+  }
+
+  void _toggleDock() {
+    setState(() {
+      _isOpen = false;
+      _dockAfterClose = false;
+      _isDocked = !_isDocked;
+    });
+  }
+
+  void _restoreDockAfterClose() {
+    if (!_dockAfterClose) {
+      return;
+    }
+
+    _isDocked = true;
+    _dockAfterClose = false;
+  }
+
   Future<void> _runAction(
     BuildContext context,
     _QuickNavigationAction action,
   ) async {
-    setState(() => _isOpen = false);
+    _closeMenu();
 
     if (action.route case final route?) {
       await playTapAndRun(context, () => context.go(route));
@@ -115,18 +174,36 @@ class _QuickNavigationFabState extends State<QuickNavigationFab> {
 class _QuickNavigationMainButton extends StatelessWidget {
   const _QuickNavigationMainButton({
     required this.isOpen,
+    required this.isDocked,
+    required this.languageCode,
     required this.size,
     required this.onPressed,
+    required this.onDoubleTap,
   });
 
   final bool isOpen;
+  final bool isDocked;
+  final String languageCode;
   final double size;
   final VoidCallback onPressed;
+  final VoidCallback onDoubleTap;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: isOpen ? 'Cerrar' : 'Navegacion rapida',
+      message: isOpen
+          ? UiCopy.text(languageCode, es: 'Cerrar', ca: 'Tancar')
+          : isDocked
+              ? UiCopy.text(
+                  languageCode,
+                  es: 'Abrir navegación rápida',
+                  ca: 'Obrir navegació ràpida',
+                )
+              : UiCopy.text(
+                  languageCode,
+                  es: 'Navegación rápida',
+                  ca: 'Navegació ràpida',
+                ),
       child: Material(
         color: AppColors.pinkAccent,
         shape: const CircleBorder(),
@@ -138,6 +215,11 @@ class _QuickNavigationMainButton extends StatelessWidget {
           onTap: () => playTapAndRun(
             context,
             onPressed,
+            stopSpeech: false,
+          ),
+          onDoubleTap: () => playTapAndRun(
+            context,
+            onDoubleTap,
             stopSpeech: false,
           ),
           child: SizedBox.square(
@@ -307,37 +389,41 @@ class _QuickNavigationAction {
   final bool isBack;
 }
 
-List<_QuickNavigationAction> _actionsFor(String currentPath, bool canPop) {
+List<_QuickNavigationAction> _actionsFor(
+  String currentPath,
+  bool canPop,
+  String languageCode,
+) {
   final isGame = _isGamePath(currentPath);
   final actions = <_QuickNavigationAction>[
     if (canPop)
-      const _QuickNavigationAction(
-        label: 'Atras',
+      _QuickNavigationAction(
+        label: UiCopy.text(languageCode, es: 'Atrás', ca: 'Tornar'),
         icon: Symbols.arrow_back_rounded,
         color: AppColors.starGold,
         isBack: true,
       ),
-    const _QuickNavigationAction(
-      label: 'Inicio',
+    _QuickNavigationAction(
+      label: UiCopy.home(languageCode),
       icon: Symbols.home_rounded,
       color: AppColors.magicPink,
       route: '/home',
     ),
-    const _QuickNavigationAction(
-      label: 'Mapa',
+    _QuickNavigationAction(
+      label: UiCopy.map(languageCode),
       icon: Symbols.map_rounded,
       color: AppColors.softMint,
       route: '/map',
     ),
-    const _QuickNavigationAction(
-      label: 'Ayuda',
+    _QuickNavigationAction(
+      label: UiCopy.help(languageCode),
       icon: Symbols.lightbulb_rounded,
       color: AppColors.skyBlue,
       route: '/help',
     ),
     if (!isGame)
-      const _QuickNavigationAction(
-        label: 'Ajustes',
+      _QuickNavigationAction(
+        label: UiCopy.settings(languageCode),
         icon: Symbols.tune_rounded,
         color: AppColors.softLilac,
         route: '/settings',

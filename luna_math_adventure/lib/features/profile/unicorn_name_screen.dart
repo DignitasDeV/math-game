@@ -10,6 +10,7 @@ import '../../core/widgets/magic_scaffold.dart';
 import '../../services/audio_service.dart';
 import '../../services/profile_controller.dart';
 import '../../services/profile_repository.dart';
+import '../../services/ui_copy.dart';
 
 class UnicornNameScreen extends ConsumerStatefulWidget {
   const UnicornNameScreen({super.key});
@@ -37,16 +38,27 @@ class _UnicornNameScreenState extends ConsumerState<UnicornNameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final languageCode = ref.watch(onboardingDraftProvider).language.ttsCode;
+
     return MagicScaffold(
-      title: 'Nombre mágico',
-      backgroundAssetPath: 'assets/images/backgrounds/home_background_screen.webp',
+      title: UiCopy.text(languageCode, es: 'Nombre mágico', ca: 'Nom màgic'),
+      backgroundAssetPath:
+          'assets/images/backgrounds/home_background_screen.webp',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AppScreenHeader(
+          AppScreenHeader(
             icon: Symbols.auto_awesome_rounded,
-            title: 'Nombre del personaje',
-            subtitle: 'Ponle el nombre que quieras.',
+            title: UiCopy.text(
+              languageCode,
+              es: 'Nombre del personaje',
+              ca: 'Nom del personatge',
+            ),
+            subtitle: UiCopy.text(
+              languageCode,
+              es: 'Ponle el nombre que quieras.',
+              ca: 'Posa-li el nom que vulguis.',
+            ),
           ),
           const Spacer(),
           TextField(
@@ -55,7 +67,11 @@ class _UnicornNameScreenState extends ConsumerState<UnicornNameScreen> {
             textCapitalization: TextCapitalization.words,
             style: AppTypography.input,
             decoration: InputDecoration(
-              labelText: 'Nombre mágico',
+              labelText: UiCopy.text(
+                languageCode,
+                es: 'Nombre mágico',
+                ca: 'Nom màgic',
+              ),
               prefixIcon: const Icon(Symbols.pets_rounded),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -73,7 +89,19 @@ class _UnicornNameScreenState extends ConsumerState<UnicornNameScreen> {
                     ? Symbols.hourglass_top_rounded
                     : Symbols.rocket_launch_rounded,
               ),
-              label: Text(_isSaving ? 'Guardando...' : 'Empezar aventura'),
+              label: Text(
+                _isSaving
+                    ? UiCopy.text(
+                        languageCode,
+                        es: 'Guardando...',
+                        ca: 'Desant...',
+                      )
+                    : UiCopy.text(
+                        languageCode,
+                        es: 'Empezar aventura',
+                        ca: 'Començar aventura',
+                      ),
+              ),
             ),
           ),
           const Spacer(),

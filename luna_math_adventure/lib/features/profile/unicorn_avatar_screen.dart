@@ -11,6 +11,7 @@ import '../../core/widgets/unicorn_avatar_image.dart';
 import '../../models/unicorn_avatar.dart';
 import '../../services/audio_service.dart';
 import '../../services/profile_repository.dart';
+import '../../services/ui_copy.dart';
 import '../../services/unicorn_avatar_asset_resolver.dart';
 
 class UnicornAvatarScreen extends ConsumerWidget {
@@ -18,31 +19,70 @@ class UnicornAvatarScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final languageCode = ref.watch(onboardingDraftProvider).language.ttsCode;
+
     return MagicScaffold(
       title: 'Avatar',
-      backgroundAssetPath: 'assets/images/backgrounds/home_background_screen.webp',
+      backgroundAssetPath:
+          'assets/images/backgrounds/home_background_screen.webp',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AppScreenHeader(
+          AppScreenHeader(
             icon: Symbols.auto_awesome_rounded,
-            title: 'Elige tu avatar',
-            subtitle: 'Elige el aspecto del personaje. Despues le pondras nombre.',
+            title: UiCopy.text(
+              languageCode,
+              es: 'Elige tu avatar',
+              ca: 'Tria el teu avatar',
+            ),
+            subtitle: UiCopy.text(
+              languageCode,
+              es: 'Elige el aspecto del personaje. Después le pondrás nombre.',
+              ca: "Tria l'aspecte del personatge. Després li posaràs nom.",
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Expanded(
-            child: ResponsiveActionGrid(
-              children: [
-                for (final avatar in UnicornAvatar.values)
-                  _AvatarButton(
-                    avatar: avatar,
-                    onPressed: () => _select(context, ref, avatar),
-                  ),
-              ],
-            ),
+            child: _avatarChoices(context, ref),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _avatarChoices(BuildContext context, WidgetRef ref) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < AppBreakpoints.narrowWidth;
+
+        if (isNarrow) {
+          return ListView.separated(
+            padding: EdgeInsets.zero,
+            itemCount: UnicornAvatar.values.length,
+            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+            itemBuilder: (context, index) {
+              final avatar = UnicornAvatar.values[index];
+              return SizedBox(
+                height: 118,
+                child: _AvatarButton(
+                  avatar: avatar,
+                  onPressed: () => _select(context, ref, avatar),
+                ),
+              );
+            },
+          );
+        }
+
+        return ResponsiveActionGrid(
+          children: [
+            for (final avatar in UnicornAvatar.values)
+              _AvatarButton(
+                avatar: avatar,
+                onPressed: () => _select(context, ref, avatar),
+              ),
+          ],
+        );
+      },
     );
   }
 

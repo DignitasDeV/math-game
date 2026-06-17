@@ -18,6 +18,12 @@ class ResponsiveScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final resolvedPadding = padding.resolve(Directionality.of(context));
+        final availableHeight =
+            (constraints.maxHeight - resolvedPadding.vertical)
+                .clamp(0.0, double.infinity)
+                .toDouble();
+
         return Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
@@ -25,7 +31,7 @@ class ResponsiveScreen extends StatelessWidget {
             child: Padding(
               padding: padding,
               child: SizedBox(
-                height: constraints.maxHeight,
+                height: availableHeight,
                 child: child,
               ),
             ),

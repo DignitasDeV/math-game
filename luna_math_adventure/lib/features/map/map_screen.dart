@@ -65,13 +65,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               },
             ),
             loading: () => const _LoadingMap(),
-            error: (_, __) => const _MapError(),
+            error: (_, __) => _MapError(languageCode: languageCode),
           ),
           loading: () => const _LoadingMap(),
-          error: (_, __) => const _MapError(),
+          error: (_, __) => _MapError(languageCode: languageCode),
         ),
         loading: () => const _LoadingMap(),
-        error: (_, __) => const _MapError(),
+        error: (_, __) => _MapError(languageCode: languageCode),
       ),
     );
   }
@@ -112,10 +112,16 @@ class _MapContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedWorld = _selectedWorld(worlds, selectedWorldId);
-    if (selectedWorld != null) {
+    final selectedWorldLevels = selectedWorld == null
+        ? const <LevelConfig>[]
+        : _levelsForWorld(selectedWorld, levels);
+    if (selectedWorld != null &&
+        selectedWorld.isImplemented &&
+        selectedWorldLevels.isNotEmpty &&
+        _isWorldUnlocked(selectedWorld, selectedWorldLevels)) {
       return _WorldLevelsView(
         world: selectedWorld,
-        levels: _levelsForWorld(selectedWorld, levels),
+        levels: selectedWorldLevels,
         languageCode: languageCode,
         isLevelUnlocked: _isLevelUnlocked,
         isLevelCompleted: _isLevelCompleted,
@@ -129,9 +135,27 @@ class _MapContent extends StatelessWidget {
       levels: levels,
       pageIndex: worldPageIndex,
       languageCode: languageCode,
+      isWorldUnlocked: _isWorldUnlocked,
       onWorldSelected: onWorldSelected,
       onPageChanged: onWorldPageChanged,
     );
+  }
+
+  bool _isWorldUnlocked(World world, List<LevelConfig> worldLevels) {
+    if (AppDevOptions.unlockAllLevels) {
+      return true;
+    }
+
+    if (!world.isImplemented || worldLevels.isEmpty) {
+      return false;
+    }
+
+    final firstImplementedWorld = _firstImplementedWorld();
+    if (firstImplementedWorld?.id == world.id) {
+      return true;
+    }
+
+    return worldLevels.any(_isLevelUnlocked);
   }
 
   bool _isLevelUnlocked(LevelConfig level) {
@@ -149,6 +173,17 @@ class _MapContent extends StatelessWidget {
 
   int _starsForLevel(LevelConfig level) {
     return progress?.starsByLevel[level.id] ?? 0;
+  }
+
+  World? _firstImplementedWorld() {
+    for (final world in worlds) {
+      final worldLevels = _levelsForWorld(world, levels);
+      if (world.isImplemented && worldLevels.isNotEmpty) {
+        return world;
+      }
+    }
+
+    return null;
   }
 }
 
@@ -188,6 +223,7 @@ class _WorldsView extends StatelessWidget {
     required this.levels,
     required this.pageIndex,
     required this.languageCode,
+    required this.isWorldUnlocked,
     required this.onWorldSelected,
     required this.onPageChanged,
   });
@@ -198,24 +234,23 @@ class _WorldsView extends StatelessWidget {
   final List<LevelConfig> levels;
   final int pageIndex;
   final String languageCode;
+  final bool Function(World world, List<LevelConfig> worldLevels)
+      isWorldUnlocked;
   final ValueChanged<String> onWorldSelected;
   final ValueChanged<int> onPageChanged;
 
   @override
   Widget build(BuildContext context) {
-    final pageCount = worlds.isEmpty
-        ? 1
-        : (worlds.length + _pageSize - 1) ~/ _pageSize;
+    final pageCount =
+        worlds.isEmpty ? 1 : (worlds.length + _pageSize - 1) ~/ _pageSize;
     final currentPage = pageIndex < 0
         ? 0
         : pageIndex >= pageCount
             ? pageCount - 1
             : pageIndex;
     final firstWorldIndex = currentPage * _pageSize;
-    final visibleWorlds = worlds
-        .skip(firstWorldIndex)
-        .take(_pageSize)
-        .toList(growable: false);
+    final visibleWorlds =
+        worlds.skip(firstWorldIndex).take(_pageSize).toList(growable: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -234,13 +269,16 @@ class _WorldsView extends StatelessWidget {
             itemBuilder: (context, index) {
               final world = visibleWorlds[index];
               final worldLevels = _levelsForWorld(world, levels);
+              final isAvailable = world.isImplemented && worldLevels.isNotEmpty;
+              final isUnlocked =
+                  isAvailable && isWorldUnlocked(world, worldLevels);
               return _WorldCard(
                 world: world,
                 levelCount: worldLevels.length,
                 languageCode: languageCode,
-                onTap: world.isImplemented && worldLevels.isNotEmpty
-                    ? () => onWorldSelected(world.id)
-                    : null,
+                isAvailable: isAvailable,
+                isUnlocked: isUnlocked,
+                onTap: isUnlocked ? () => onWorldSelected(world.id) : null,
               );
             },
           ),
@@ -251,9 +289,8 @@ class _WorldsView extends StatelessWidget {
             currentPage: currentPage,
             pageCount: pageCount,
             languageCode: languageCode,
-            onPrevious: currentPage > 0
-                ? () => onPageChanged(currentPage - 1)
-                : null,
+            onPrevious:
+                currentPage > 0 ? () => onPageChanged(currentPage - 1) : null,
             onNext: currentPage < pageCount - 1
                 ? () => onPageChanged(currentPage + 1)
                 : null,
@@ -303,9 +340,8 @@ class _WorldPageControls extends StatelessWidget {
           _ImageNavButton(
             assetPath: 'assets/images/ui/buttons/next.webp',
             fallbackIcon: Symbols.arrow_forward_rounded,
-            tooltip: languageCode == 'ca-ES'
-                ? 'Mons seguents'
-                : 'Mundos siguientes',
+            tooltip:
+                languageCode == 'ca-ES' ? 'Mons seguents' : 'Mundos siguientes',
             onPressed: onNext,
           ),
         ],
@@ -440,6 +476,9 @@ class _WorldLevelsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNarrow =
+        MediaQuery.sizeOf(context).width < AppBreakpoints.narrowWidth;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.94),
@@ -457,52 +496,116 @@ class _WorldLevelsHeader extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          children: [
-            Material(
-              color: AppColors.softLilac.withValues(alpha: 0.18),
-              shape: const CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: IconButton(
-                tooltip: _backTooltip(languageCode),
-                onPressed: onBack,
-                icon: const Icon(Symbols.arrow_back_rounded),
-                color: AppColors.purpleText,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+        child: isNarrow
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    world.name.get(languageCode),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.sectionTitle,
+                  Row(
+                    children: [
+                      _WorldBackButton(
+                        tooltip: _backTooltip(languageCode),
+                        onBack: onBack,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                          child: _WorldHeaderText(
+                              world: world, languageCode: languageCode)),
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    world.description.get(languageCode),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.helper.copyWith(
-                      color: AppColors.purpleText,
+                  const SizedBox(height: AppSpacing.md),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _WorldProgressPill(
+                      completedCount: completedCount,
+                      levelCount: levelCount,
+                      languageCode: languageCode,
                     ),
                   ),
                 ],
+              )
+            : Row(
+                children: [
+                  _WorldBackButton(
+                    tooltip: _backTooltip(languageCode),
+                    onBack: onBack,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: _WorldHeaderText(
+                      world: world,
+                      languageCode: languageCode,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  _WorldProgressPill(
+                    completedCount: completedCount,
+                    levelCount: levelCount,
+                    languageCode: languageCode,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            _WorldProgressPill(
-              completedCount: completedCount,
-              levelCount: levelCount,
-              languageCode: languageCode,
-            ),
-          ],
-        ),
       ),
+    );
+  }
+}
+
+class _WorldBackButton extends StatelessWidget {
+  const _WorldBackButton({
+    required this.tooltip,
+    required this.onBack,
+  });
+
+  final String tooltip;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.softLilac.withValues(alpha: 0.18),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onBack,
+        icon: const Icon(Symbols.arrow_back_rounded),
+        color: AppColors.purpleText,
+      ),
+    );
+  }
+}
+
+class _WorldHeaderText extends StatelessWidget {
+  const _WorldHeaderText({
+    required this.world,
+    required this.languageCode,
+  });
+
+  final World world;
+  final String languageCode;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          world.name.get(languageCode),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.sectionTitle.copyWith(fontSize: 23),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          world.description.get(languageCode),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.helper.copyWith(
+            color: AppColors.purpleText,
+            fontSize: 16,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -583,8 +686,7 @@ class _FixedGrid extends StatelessWidget {
                               gridItemCount,
                             );
                         columnIndex++) ...[
-                      if (columnIndex > 0)
-                        const SizedBox(width: AppSpacing.md),
+                      if (columnIndex > 0) const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: _gridChild(
                           context,
@@ -603,6 +705,10 @@ class _FixedGrid extends StatelessWidget {
   }
 
   int _columnCount(BoxConstraints constraints, int count) {
+    if (constraints.maxWidth < AppBreakpoints.narrowWidth) {
+      return 1;
+    }
+
     final wideEnoughForThree = constraints.maxWidth >= 560;
     final heightLimited = constraints.maxHeight < 420 && count > 4;
     if ((wideEnoughForThree || heightLimited) && maxColumns >= 3) {
@@ -640,18 +746,21 @@ class _WorldCard extends StatelessWidget {
     required this.world,
     required this.levelCount,
     required this.languageCode,
+    required this.isAvailable,
+    required this.isUnlocked,
     required this.onTap,
   });
 
   final World world;
   final int levelCount;
   final String languageCode;
+  final bool isAvailable;
+  final bool isUnlocked;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isAvailable = onTap != null;
-    final color = isAvailable ? AppColors.magicPink : AppColors.softLilac;
+    final color = isUnlocked ? AppColors.magicPink : AppColors.softLilac;
 
     return Material(
       color: Colors.transparent,
@@ -675,14 +784,14 @@ class _WorldCard extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withValues(alpha: isAvailable ? 0.1 : 0.34),
-                  Colors.black.withValues(alpha: isAvailable ? 0.56 : 0.7),
+                  Colors.black.withValues(alpha: isUnlocked ? 0.1 : 0.34),
+                  Colors.black.withValues(alpha: isUnlocked ? 0.56 : 0.7),
                 ],
               ),
             ),
           ),
           InkWell(
-            onTap: isAvailable
+            onTap: onTap != null
                 ? () => playTapAndRun(
                       context,
                       onTap!,
@@ -715,9 +824,12 @@ class _WorldCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    isAvailable
-                        ? _levelCountLabel(languageCode, levelCount)
-                        : _comingSoonLabel(languageCode),
+                    _worldCardStatusLabel(
+                      languageCode,
+                      isAvailable: isAvailable,
+                      isUnlocked: isUnlocked,
+                      levelCount: levelCount,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
@@ -857,6 +969,7 @@ class _LevelTile extends StatelessWidget {
                             color: isUnlocked
                                 ? AppColors.purpleText
                                 : AppColors.purpleTextLight,
+                            fontSize: 21,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
@@ -868,6 +981,7 @@ class _LevelTile extends StatelessWidget {
                             color: isUnlocked
                                 ? AppColors.purpleText
                                 : AppColors.purpleTextLight,
+                            fontSize: 16,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
@@ -897,7 +1011,6 @@ class _LevelTile extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _LevelNumberBadge extends StatelessWidget {
@@ -939,6 +1052,7 @@ class _LevelNumberBadge extends StatelessWidget {
               '${index + 1}',
               style: AppTypography.sectionTitle.copyWith(
                 color: isUnlocked ? iconColor : AppColors.purpleTextLight,
+                fontSize: 23,
               ),
             ),
     );
@@ -1033,9 +1147,10 @@ class _LevelChip extends StatelessWidget {
           const SizedBox(width: AppSpacing.xs),
           Text(
             label,
-            style: AppTypography.caption.copyWith(
+            style: AppTypography.label.copyWith(
               color: foreground,
               fontWeight: FontWeight.w800,
+              fontSize: 16,
             ),
           ),
         ],
@@ -1156,6 +1271,23 @@ String _levelCountLabel(String languageCode, int levelCount) {
   return levelCount == 1 ? '1 nivel' : '$levelCount niveles';
 }
 
+String _worldCardStatusLabel(
+  String languageCode, {
+  required bool isAvailable,
+  required bool isUnlocked,
+  required int levelCount,
+}) {
+  if (!isAvailable) {
+    return _comingSoonLabel(languageCode);
+  }
+
+  if (!isUnlocked) {
+    return languageCode == 'ca-ES' ? 'Bloquejat' : 'Bloqueado';
+  }
+
+  return _levelCountLabel(languageCode, levelCount);
+}
+
 String _comingSoonLabel(String languageCode) {
   return languageCode == 'ca-ES' ? 'Properament' : 'Próximamente';
 }
@@ -1185,12 +1317,18 @@ class _LoadingMap extends StatelessWidget {
 }
 
 class _MapError extends StatelessWidget {
-  const _MapError();
+  const _MapError({required this.languageCode});
+
+  final String languageCode;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('No se pudo cargar el mapa.'),
+    return Center(
+      child: Text(
+        languageCode == 'ca-ES'
+            ? "No s'ha pogut carregar el mapa."
+            : 'No se pudo cargar el mapa.',
+      ),
     );
   }
 }

@@ -12,9 +12,12 @@ import '../../core/widgets/magic_scaffold.dart';
 import '../../core/widgets/unicorn_avatar_image.dart';
 import '../../models/player_profile.dart';
 import '../../models/unicorn_avatar.dart';
+import '../../models/unicorn_avatar_stage.dart';
 import '../../services/audio_service.dart';
 import '../../services/profile_controller.dart';
 import '../../services/profile_repository.dart';
+import '../../services/progress_repository.dart';
+import '../../services/ui_copy.dart';
 import '../../services/unicorn_avatar_asset_resolver.dart';
 
 class ProfileSelectionScreen extends ConsumerWidget {
@@ -23,15 +26,19 @@ class ProfileSelectionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final familyState = ref.watch(profileControllerProvider);
+    final languageCode =
+        ref.watch(activeProfileProvider)?.language.ttsCode ?? 'es-ES';
 
     return MagicScaffold(
-      title: 'Perfiles',
-      backgroundAssetPath: 'assets/images/backgrounds/home_background_screen.webp',
+      title: UiCopy.text(languageCode, es: 'Perfiles', ca: 'Perfils'),
+      backgroundAssetPath:
+          'assets/images/backgrounds/home_background_screen.webp',
       showBackButton: false,
       child: familyState.when(
         data: (family) {
           if (!family.hasProfiles) {
             return _EmptyProfiles(
+              languageCode: languageCode,
               onCreate: () => _createProfile(context, ref),
             );
           }
@@ -43,34 +50,53 @@ class ProfileSelectionScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AppScreenHeader(
-                title: 'Quien va a jugar?',
+                title: UiCopy.text(
+                  languageCode,
+                  es: '¿Quién va a jugar?',
+                  ca: 'Qui jugarà?',
+                ),
                 subtitle: canAddProfile
-                    ? 'Elige un perfil o manten pulsado para editar.'
-                    : 'Ya hay 8 perfiles. Manten pulsado para editar.',
+                    ? UiCopy.text(
+                        languageCode,
+                        es: 'Elige un perfil o mantén pulsado para editar.',
+                        ca: 'Tria un perfil o mantén premut per editar.',
+                      )
+                    : UiCopy.text(
+                        languageCode,
+                        es: 'Ya hay 8 perfiles. Mantén pulsado para editar.',
+                        ca: 'Ja hi ha 8 perfils. Mantén premut per editar.',
+                      ),
               ),
               const SizedBox(height: AppSpacing.xl),
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final columns = _profileColumns(constraints.maxWidth);
+                    final isNarrow =
+                        constraints.maxWidth < AppBreakpoints.narrowWidth;
                     final avatarSize = _avatarSize(
                       width: constraints.maxWidth,
                       columns: columns,
                     );
+                    final childAspectRatio =
+                        isNarrow ? (columns == 1 ? 1.18 : 0.82) : 0.72;
 
                     return GridView.builder(
                       padding: EdgeInsets.zero,
                       itemCount: itemCount,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: columns,
-                        mainAxisSpacing: AppSpacing.xl,
-                        crossAxisSpacing: AppSpacing.lg,
-                        childAspectRatio: 0.72,
+                        mainAxisSpacing:
+                            isNarrow ? AppSpacing.md : AppSpacing.xl,
+                        crossAxisSpacing:
+                            isNarrow ? AppSpacing.md : AppSpacing.lg,
+                        childAspectRatio: childAspectRatio,
                       ),
                       itemBuilder: (context, index) {
                         if (index >= family.profiles.length) {
                           return _AddProfileTile(
                             avatarSize: avatarSize,
+                            languageCode: languageCode,
                             onTap: () => _createProfile(context, ref),
                           );
                         }
@@ -81,8 +107,12 @@ class ProfileSelectionScreen extends ConsumerWidget {
                           avatarSize: avatarSize,
                           isActive: profile.id == family.activeProfileId,
                           onTap: () => _selectProfile(context, ref, profile),
-                          onLongPress: () =>
-                              _showProfileOptions(context, ref, profile),
+                          onLongPress: () => _showProfileOptions(
+                            context,
+                            ref,
+                            profile,
+                            languageCode,
+                          ),
                         );
                       },
                     );
@@ -99,7 +129,7 @@ class ProfileSelectionScreen extends ConsumerWidget {
               context,
               () => ref.invalidate(profileControllerProvider),
             ),
-            child: const Text('Reintentar'),
+            child: Text(UiCopy.retry(languageCode)),
           ),
         ),
       ),
@@ -111,7 +141,9 @@ class ProfileSelectionScreen extends ConsumerWidget {
     WidgetRef ref,
     PlayerProfile profile,
   ) async {
-    await ref.read(profileControllerProvider.notifier).selectProfile(profile.id);
+    await ref
+        .read(profileControllerProvider.notifier)
+        .selectProfile(profile.id);
     if (context.mounted) {
       context.go('/home');
     }
@@ -131,6 +163,7 @@ class ProfileSelectionScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     PlayerProfile profile,
+    String languageCode,
   ) async {
     await showModalBottomSheet<void>(
       context: context,
@@ -157,29 +190,54 @@ class ProfileSelectionScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.md),
                 _ProfileOptionButton(
                   icon: Symbols.edit_rounded,
-                  label: 'Editar nombre',
+                  label: UiCopy.text(
+                    languageCode,
+                    es: 'Editar nombre',
+                    ca: 'Editar nom',
+                  ),
                   onPressed: () {
                     Navigator.of(sheetContext).pop();
-                    _editProfileName(context, ref, profile);
+                    _editProfileName(context, ref, profile, languageCode);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _ProfileOptionButton(
+                  icon: Symbols.favorite_rounded,
+                  label: UiCopy.text(
+                    languageCode,
+                    es: 'Editar nombre del unicornio',
+                    ca: "Editar nom de l'unicorn",
+                  ),
+                  onPressed: () {
+                    Navigator.of(sheetContext).pop();
+                    _editUnicornName(context, ref, profile, languageCode);
                   },
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 _ProfileOptionButton(
                   icon: Symbols.auto_awesome_rounded,
-                  label: 'Cambiar avatar',
+                  label: UiCopy.text(
+                    languageCode,
+                    es: 'Cambiar avatar',
+                    ca: 'Canviar avatar',
+                  ),
                   onPressed: () {
                     Navigator.of(sheetContext).pop();
-                    _editProfileAvatar(context, ref, profile);
+                    _editProfileAvatar(context, ref, profile, languageCode);
                   },
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 _ProfileOptionButton(
                   icon: Symbols.delete_rounded,
-                  label: 'Eliminar perfil',
+                  label: UiCopy.text(
+                    languageCode,
+                    es: 'Eliminar perfil',
+                    ca: 'Eliminar perfil',
+                  ),
                   color: AppColors.gentleError,
                   onPressed: () {
                     Navigator.of(sheetContext).pop();
-                    _confirmDeleteProfile(context, ref, profile);
+                    _confirmDeleteProfile(context, ref, profile, languageCode);
                   },
                 ),
               ],
@@ -194,6 +252,7 @@ class ProfileSelectionScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     PlayerProfile profile,
+    String languageCode,
   ) async {
     final controller = TextEditingController(text: profile.childName);
     final name = await showDialog<String>(
@@ -201,13 +260,23 @@ class ProfileSelectionScreen extends ConsumerWidget {
       animationStyle: AppMotion.dialog,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Editar nombre'),
+          title: Text(UiCopy.text(
+            languageCode,
+            es: 'Editar nombre',
+            ca: 'Editar nom',
+          )),
           content: TextField(
             controller: controller,
             autofocus: true,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(labelText: 'Nombre del perfil'),
+            decoration: InputDecoration(
+              labelText: UiCopy.text(
+                languageCode,
+                es: 'Nombre del perfil',
+                ca: 'Nom del perfil',
+              ),
+            ),
             onSubmitted: (value) {
               Navigator.of(dialogContext).pop(value.trim());
             },
@@ -215,13 +284,21 @@ class ProfileSelectionScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancelar'),
+              child: Text(UiCopy.text(
+                languageCode,
+                es: 'Cancelar',
+                ca: 'Cancel·lar',
+              )),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(
                 controller.text.trim(),
               ),
-              child: const Text('Guardar'),
+              child: Text(UiCopy.text(
+                languageCode,
+                es: 'Guardar',
+                ca: 'Desar',
+              )),
             ),
           ],
         );
@@ -238,11 +315,86 @@ class ProfileSelectionScreen extends ConsumerWidget {
         );
   }
 
+  Future<void> _editUnicornName(
+    BuildContext context,
+    WidgetRef ref,
+    PlayerProfile profile,
+    String languageCode,
+  ) async {
+    final controller = TextEditingController(text: profile.unicornName);
+    final unicornName = await showDialog<String>(
+      context: context,
+      animationStyle: AppMotion.dialog,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(UiCopy.text(
+            languageCode,
+            es: 'Editar unicornio',
+            ca: "Editar l'unicorn",
+          )),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.done,
+            decoration: InputDecoration(
+              labelText: UiCopy.text(
+                languageCode,
+                es: 'Nombre del unicornio',
+                ca: "Nom de l'unicorn",
+              ),
+            ),
+            onSubmitted: (value) {
+              Navigator.of(dialogContext).pop(value.trim());
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(UiCopy.text(
+                languageCode,
+                es: 'Cancelar',
+                ca: 'Cancel·lar',
+              )),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(
+                controller.text.trim(),
+              ),
+              child: Text(UiCopy.text(
+                languageCode,
+                es: 'Guardar',
+                ca: 'Desar',
+              )),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+
+    if (unicornName == null || unicornName.isEmpty) {
+      return;
+    }
+
+    await ref.read(profileControllerProvider.notifier).updateProfile(
+          profile.copyWith(unicornName: unicornName),
+        );
+  }
+
   Future<void> _editProfileAvatar(
     BuildContext context,
     WidgetRef ref,
     PlayerProfile profile,
+    String languageCode,
   ) async {
+    final unicornStage = await ref
+        .read(profileProgressProvider(profile.id).future)
+        .then((progress) => progress.unlockedUnicornStage);
+    if (!context.mounted) {
+      return;
+    }
+
     final avatar = await showModalBottomSheet<UnicornAvatar>(
       context: context,
       isScrollControlled: true,
@@ -264,14 +416,22 @@ class ProfileSelectionScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Cambiar avatar',
+                        UiCopy.text(
+                          languageCode,
+                          es: 'Cambiar avatar',
+                          ca: 'Canviar avatar',
+                        ),
                         style: AppTypography.sectionTitle,
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Cerrar',
+                      tooltip: UiCopy.text(
+                        languageCode,
+                        es: 'Cerrar',
+                        ca: 'Tancar',
+                      ),
                       onPressed: () => Navigator.of(sheetContext).pop(),
                       icon: const Icon(Symbols.close_rounded),
                     ),
@@ -281,18 +441,20 @@ class ProfileSelectionScreen extends ConsumerWidget {
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final columns = constraints.maxWidth >= 600 ? 3 : 2;
+                      final columns = constraints.maxWidth >= 600
+                          ? 3
+                          : constraints.maxWidth < 340
+                              ? 1
+                              : 2;
                       final rows =
                           (UnicornAvatar.values.length + columns - 1) ~/
                               columns;
-                      final cellWidth =
-                          (constraints.maxWidth -
+                      final cellWidth = (constraints.maxWidth -
                               AppSpacing.md * (columns - 1)) /
                           columns;
                       final cellHeight =
-                          (constraints.maxHeight -
-                              AppSpacing.md * (rows - 1)) /
-                          rows;
+                          (constraints.maxHeight - AppSpacing.md * (rows - 1)) /
+                              rows;
 
                       return GridView.count(
                         crossAxisCount: columns,
@@ -304,6 +466,7 @@ class ProfileSelectionScreen extends ConsumerWidget {
                           for (final avatar in UnicornAvatar.values)
                             _AvatarChoiceTile(
                               avatar: avatar,
+                              stage: unicornStage,
                               isSelected: avatar == profile.unicornAvatar,
                               onTap: () =>
                                   Navigator.of(sheetContext).pop(avatar),
@@ -333,24 +496,41 @@ class ProfileSelectionScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     PlayerProfile profile,
+    String languageCode,
   ) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       animationStyle: AppMotion.dialog,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Eliminar perfil'),
+          title: Text(UiCopy.text(
+            languageCode,
+            es: 'Eliminar perfil',
+            ca: 'Eliminar perfil',
+          )),
           content: Text(
-            'Quieres eliminar el perfil de ${profile.childName}?',
+            UiCopy.text(
+              languageCode,
+              es: '¿Quieres eliminar el perfil de ${profile.childName}?',
+              ca: 'Vols eliminar el perfil de ${profile.childName}?',
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancelar'),
+              child: Text(UiCopy.text(
+                languageCode,
+                es: 'Cancelar',
+                ca: 'Cancel·lar',
+              )),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Eliminar'),
+              child: Text(UiCopy.text(
+                languageCode,
+                es: 'Eliminar',
+                ca: 'Eliminar',
+              )),
             ),
           ],
         );
@@ -361,13 +541,19 @@ class ProfileSelectionScreen extends ConsumerWidget {
       return;
     }
 
-    await ref.read(profileControllerProvider.notifier).deleteProfile(profile.id);
+    await ref
+        .read(profileControllerProvider.notifier)
+        .deleteProfile(profile.id);
   }
 }
 
 class _EmptyProfiles extends StatelessWidget {
-  const _EmptyProfiles({required this.onCreate});
+  const _EmptyProfiles({
+    required this.languageCode,
+    required this.onCreate,
+  });
 
+  final String languageCode;
   final VoidCallback onCreate;
 
   @override
@@ -382,14 +568,22 @@ class _EmptyProfiles extends StatelessWidget {
           color: AppColors.lilacAccent,
         ),
         const SizedBox(height: AppSpacing.lg),
-        const Text(
-          'Crea el primer perfil',
+        Text(
+          UiCopy.text(
+            languageCode,
+            es: 'Crea el primer perfil',
+            ca: 'Crea el primer perfil',
+          ),
           textAlign: TextAlign.center,
           style: AppTypography.title,
         ),
         const SizedBox(height: AppSpacing.md),
-        const Text(
-          'Cada nina o nino tendra su propia aventura y progreso.',
+        Text(
+          UiCopy.text(
+            languageCode,
+            es: 'Cada niña o niño tendrá su propia aventura y progreso.',
+            ca: 'Cada nena o nen tindrà la seva aventura i el seu progrés.',
+          ),
           textAlign: TextAlign.center,
           style: AppTypography.body,
         ),
@@ -399,7 +593,11 @@ class _EmptyProfiles extends StatelessWidget {
           child: FilledButton.icon(
             onPressed: () => playTapAndRun(context, onCreate),
             icon: const Icon(Symbols.person_add_rounded),
-            label: const Text('Crear perfil'),
+            label: Text(UiCopy.text(
+              languageCode,
+              es: 'Crear perfil',
+              ca: 'Crear perfil',
+            )),
           ),
         ),
       ],
@@ -407,7 +605,7 @@ class _EmptyProfiles extends StatelessWidget {
   }
 }
 
-class _ProfileAvatarTile extends StatelessWidget {
+class _ProfileAvatarTile extends ConsumerWidget {
   const _ProfileAvatarTile({
     required this.profile,
     required this.avatarSize,
@@ -423,10 +621,15 @@ class _ProfileAvatarTile extends StatelessWidget {
   final VoidCallback onLongPress;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = profile.unicornAvatar.accentColor;
     final borderColor = isActive ? AppColors.pinkAccent : Colors.white;
     final shadowColor = color.withValues(alpha: isActive ? 0.38 : 0.22);
+    final unicornStage = ref
+            .watch(profileProgressProvider(profile.id))
+            .valueOrNull
+            ?.unlockedUnicornStage ??
+        UnicornAvatarStage.stage01;
 
     return Material(
       color: Colors.transparent,
@@ -459,6 +662,7 @@ class _ProfileAvatarTile extends StatelessWidget {
                   child: ClipOval(
                     child: UnicornAvatarImage(
                       avatar: profile.unicornAvatar,
+                      stage: unicornStage,
                       emotion: UnicornAvatarEmotion.idle,
                       fallback: Icon(
                         Symbols.auto_awesome_rounded,
@@ -548,11 +752,13 @@ class _ProfileOptionButton extends StatelessWidget {
 class _AvatarChoiceTile extends StatelessWidget {
   const _AvatarChoiceTile({
     required this.avatar,
+    required this.stage,
     required this.isSelected,
     required this.onTap,
   });
 
   final UnicornAvatar avatar;
+  final UnicornAvatarStage stage;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -584,6 +790,7 @@ class _AvatarChoiceTile extends StatelessWidget {
                 child: ClipOval(
                   child: UnicornAvatarImage(
                     avatar: avatar,
+                    stage: stage,
                     emotion: UnicornAvatarEmotion.idle,
                     fallback: Icon(
                       Symbols.auto_awesome_rounded,
@@ -604,10 +811,12 @@ class _AvatarChoiceTile extends StatelessWidget {
 class _AddProfileTile extends StatelessWidget {
   const _AddProfileTile({
     required this.avatarSize,
+    required this.languageCode,
     required this.onTap,
   });
 
   final double avatarSize;
+  final String languageCode;
   final VoidCallback onTap;
 
   @override
@@ -651,7 +860,11 @@ class _AddProfileTile extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                'Anadir perfil',
+                UiCopy.text(
+                  languageCode,
+                  es: 'Añadir perfil',
+                  ca: 'Afegir perfil',
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -659,7 +872,11 @@ class _AddProfileTile extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                'Hasta 8',
+                UiCopy.text(
+                  languageCode,
+                  es: 'Hasta 8',
+                  ca: 'Fins a 8',
+                ),
                 textAlign: TextAlign.center,
                 style: AppTypography.caption,
               ),
@@ -675,8 +892,11 @@ int _profileColumns(double width) {
   if (width >= 720) {
     return 4;
   }
-  if (width >= 500) {
+  if (width >= AppBreakpoints.narrowWidth) {
     return 3;
+  }
+  if (width < 340) {
+    return 1;
   }
   return 2;
 }

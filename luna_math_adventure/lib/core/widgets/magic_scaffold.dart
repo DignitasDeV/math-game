@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/app_background_style.dart';
 import '../../services/audio_service.dart';
 import '../../services/profile_controller.dart';
+import '../../services/ui_copy.dart';
 import 'quick_navigation_fab.dart';
 import 'responsive_asset_background.dart';
 import 'responsive_screen.dart';
@@ -30,6 +31,8 @@ class MagicScaffold extends ConsumerWidget {
     final router = GoRouter.of(context);
     final currentPath = GoRouterState.of(context).uri.path;
     final canPop = showBackButton && router.canPop();
+    final languageCode =
+        ref.watch(activeProfileProvider)?.language.ttsCode ?? 'es-ES';
     final canQuickNavigate = ref.watch(activeProfileProvider) != null &&
         !_isQuickNavigationExcluded(currentPath);
     final hasAppBar = canPop || actions.isNotEmpty;
@@ -45,7 +48,7 @@ class MagicScaffold extends ConsumerWidget {
                   ? IconButton(
                       onPressed: () => playBackAndRun(context, context.pop),
                       icon: const Icon(Icons.arrow_back_rounded),
-                      tooltip: 'Volver',
+                      tooltip: UiCopy.back(languageCode),
                     )
                   : null,
             )
@@ -70,6 +73,7 @@ class MagicScaffold extends ConsumerWidget {
             QuickNavigationFab(
               currentPath: currentPath,
               canPop: router.canPop(),
+              languageCode: languageCode,
             ),
         ],
       ),

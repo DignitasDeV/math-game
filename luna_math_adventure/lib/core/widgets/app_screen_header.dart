@@ -23,11 +23,6 @@ class AppScreenHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (icon != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: Icon(icon, size: iconSize),
-          ),
         Text(title, style: AppTypography.title),
         if (subtitle != null) ...[
           const SizedBox(height: AppSpacing.xs),

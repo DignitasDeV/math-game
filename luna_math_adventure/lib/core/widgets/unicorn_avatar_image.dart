@@ -3,6 +3,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../models/unicorn_avatar.dart';
+import '../../models/unicorn_avatar_stage.dart';
 import '../../services/unicorn_avatar_asset_resolver.dart';
 import 'safe_asset_image.dart';
 

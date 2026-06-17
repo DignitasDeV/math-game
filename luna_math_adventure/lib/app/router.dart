@@ -19,7 +19,8 @@ import '../features/profile/home_screen.dart';
 final appRouter = GoRouter(
   initialLocation: '/',
   routes: [
-    GoRoute(path: '/', builder: (context, state) => _route(const SplashScreen())),
+    GoRoute(
+        path: '/', builder: (context, state) => _route(const SplashScreen())),
     GoRoute(
       path: '/profiles',
       builder: (context, state) => _route(const ProfileSelectionScreen()),
@@ -40,9 +41,12 @@ final appRouter = GoRouter(
       path: '/unicorn-name',
       builder: (context, state) => _route(const UnicornNameScreen()),
     ),
-    GoRoute(path: '/home', builder: (context, state) => _route(const HomeScreen())),
-    GoRoute(path: '/map', builder: (context, state) => _route(const MapScreen())),
-    GoRoute(path: '/game', builder: (context, state) => _route(const GameScreen())),
+    GoRoute(
+        path: '/home', builder: (context, state) => _route(const HomeScreen())),
+    GoRoute(
+        path: '/map', builder: (context, state) => _route(const MapScreen())),
+    GoRoute(
+        path: '/game', builder: (context, state) => _route(const GameScreen())),
     GoRoute(
       path: '/game/:levelId',
       builder: (context, state) => _route(
@@ -55,7 +59,9 @@ final appRouter = GoRouter(
       path: '/practice',
       builder: (context, state) => _route(const PracticeModeScreen()),
     ),
-    GoRoute(path: '/help', builder: (context, state) => _route(const HelpCenterScreen())),
+    GoRoute(
+        path: '/help',
+        builder: (context, state) => _route(const HelpCenterScreen())),
     GoRoute(
       path: '/rewards',
       builder: (context, state) => _route(const RewardsScreen()),

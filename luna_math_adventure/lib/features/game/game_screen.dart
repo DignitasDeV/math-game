@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../app/dev_options.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 import '../../app/theme/app_typography.dart';
@@ -16,11 +17,14 @@ import '../../core/widgets/safe_asset_image.dart';
 import '../../core/widgets/speech_toggle_button.dart';
 import '../../core/widgets/unicorn_avatar_image.dart';
 import '../../core/widgets/responsive_action_grid.dart';
+import '../../models/player_progress.dart';
 import '../../models/reward.dart';
 import '../../models/unicorn_avatar.dart';
+import '../../models/unicorn_avatar_stage.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_repository.dart';
 import '../../services/profile_controller.dart';
+import '../../services/progress_repository.dart';
 import '../../services/speech_playback_controller.dart';
 import '../../services/speech_service.dart';
 import '../../services/unicorn_avatar_asset_resolver.dart';
@@ -36,44 +40,168 @@ class GameScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sessionState = ref.watch(
-      gameSessionProvider(levelId ?? 'heart_forest_01'),
-    );
+    final resolvedLevelId = levelId ?? 'heart_forest_01';
     final languageCode =
         ref.watch(activeProfileProvider)?.language.ttsCode ?? 'es-ES';
+    final progressState = ref.watch(activeProgressProvider);
+    final activeProgress = progressState.valueOrNull;
+
+    if (!AppDevOptions.unlockAllLevels) {
+      if (progressState.isLoading && !progressState.hasValue) {
+        return MagicScaffold(
+          title: languageCode == 'ca-ES' ? 'Nivell' : 'Nivel',
+          backgroundAssetPath: _levelBackgroundAssetPath('heart_forest'),
+          child: const Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      if (progressState.hasError && !progressState.hasValue) {
+        return MagicScaffold(
+          title: languageCode == 'ca-ES' ? 'Nivell' : 'Nivel',
+          backgroundAssetPath: _levelBackgroundAssetPath('heart_forest'),
+          child: Center(
+            child: Text(
+              languageCode == 'ca-ES'
+                  ? "No s'ha pogut carregar el progrés."
+                  : 'No se pudo cargar el progreso.',
+            ),
+          ),
+        );
+      }
+
+      if (!_isLevelIdUnlocked(resolvedLevelId, progressState.valueOrNull)) {
+        return MagicScaffold(
+          title: languageCode == 'ca-ES'
+              ? 'Nivell bloquejat'
+              : 'Nivel bloqueado',
+          backgroundAssetPath: _levelBackgroundAssetPath('heart_forest'),
+          child: _LockedLevelView(languageCode: languageCode),
+        );
+      }
+    }
+
+    final sessionState = ref.watch(
+      gameSessionProvider(resolvedLevelId),
+    );
     final currentSession = sessionState.valueOrNull;
 
     return MagicScaffold(
-      title: currentSession?.level.title.get(languageCode) ?? 'Nivel',
+      title: currentSession?.level.title.get(languageCode) ??
+          (languageCode == 'ca-ES' ? 'Nivell' : 'Nivel'),
       backgroundAssetPath: _levelBackgroundAssetPath(
         currentSession?.level.worldId ?? 'heart_forest',
       ),
       child: sessionState.when(
         data: (session) => _ExerciseView(
           session: session,
-          levelId: levelId ?? 'heart_forest_01',
+          levelId: resolvedLevelId,
+          unlockedUnicornStage:
+              activeProgress?.unlockedUnicornStage ?? UnicornAvatarStage.stage01,
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(
-          child: Text('No se pudo cargar el ejercicio.'),
+        error: (_, __) => Center(
+          child: Text(
+            languageCode == 'ca-ES'
+                ? "No s'ha pogut carregar l'exercici."
+                : 'No se pudo cargar el ejercicio.',
+          ),
         ),
       ),
     );
   }
 }
 
+bool _isLevelIdUnlocked(String levelId, PlayerProgress? progress) {
+  if (levelId == 'heart_forest_01') {
+    return true;
+  }
+
+  return progress?.unlockedLevelIds.contains(levelId) ?? false;
+}
+
 String _levelBackgroundAssetPath(String worldId) {
   return 'assets/images/backgrounds/${worldId}_screen.webp';
+}
+
+class _LockedLevelView extends StatelessWidget {
+  const _LockedLevelView({required this.languageCode});
+
+  final String languageCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final isCatalan = languageCode == 'ca-ES';
+
+    return Center(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.94),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppColors.softLilac.withValues(alpha: 0.4),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.purpleText.withValues(alpha: 0.1),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Symbols.lock_rounded,
+                color: AppColors.purpleText,
+                size: 48,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                isCatalan
+                    ? 'Aquest nivell encara no toca.'
+                    : 'Este nivel aún no toca.',
+                textAlign: TextAlign.center,
+                style: AppTypography.sectionTitle.copyWith(
+                  color: AppColors.purpleText,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                isCatalan
+                    ? 'Completa els nivells anteriors per desbloquejar-lo.'
+                    : 'Completa los niveles anteriores para desbloquearlo.',
+                textAlign: TextAlign.center,
+                style: AppTypography.helper.copyWith(
+                  color: AppColors.purpleText,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              FilledButton.icon(
+                onPressed: () => context.go('/map'),
+                icon: const Icon(Symbols.map_rounded),
+                label: Text(isCatalan ? 'Tornar al mapa' : 'Volver al mapa'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _ExerciseView extends ConsumerStatefulWidget {
   const _ExerciseView({
     required this.session,
     required this.levelId,
+    required this.unlockedUnicornStage,
   });
 
   final GameSessionState session;
   final String levelId;
+  final UnicornAvatarStage unlockedUnicornStage;
 
   @override
   ConsumerState<_ExerciseView> createState() => _ExerciseViewState();
@@ -112,14 +240,16 @@ class _ExerciseViewState extends ConsumerState<_ExerciseView> {
   Widget build(BuildContext context) {
     final speechService = ref.watch(speechServiceProvider);
     final audioService = ref.watch(audioServiceProvider);
-    final speechPlayback =
-        ref.read(speechPlaybackControllerProvider.notifier);
+    final speechPlayback = ref.read(speechPlaybackControllerProvider.notifier);
     final activeProfile = ref.watch(activeProfileProvider);
     final languageCode = activeProfile?.language.ttsCode ?? 'es-ES';
     final voiceId = activeProfile?.ttsVoiceId;
     final unicornName = activeProfile?.unicornName ?? 'Luna';
-    final unicornAvatar = activeProfile?.unicornAvatar ?? UnicornAvatar.avatar01;
+    final unicornAvatar =
+        activeProfile?.unicornAvatar ?? UnicornAvatar.avatar01;
     final session = widget.session;
+    final unicornStage =
+        session.newUnicornStage ?? widget.unlockedUnicornStage;
     final levelId = widget.levelId;
     final controller = ref.read(gameSessionProvider(levelId).notifier);
 
@@ -135,23 +265,38 @@ class _ExerciseViewState extends ConsumerState<_ExerciseView> {
         nextLevelId: session.nextLevelId,
         unicornName: unicornName,
         unicornAvatar: unicornAvatar,
+        unicornStage: unicornStage,
+        newUnicornStage: session.newUnicornStage,
         onRepeatLevel: controller.repeatLevel,
       );
     }
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < AppBreakpoints.narrowWidth;
         final isCompactHeight = constraints.maxHeight < 700;
         final sectionGap = isCompactHeight ? AppSpacing.sm : AppSpacing.md;
         final writtenOperation = _writtenOperationFor(session);
-        final guideFlex = writtenOperation == null
-            ? isCompactHeight
+        final guideFlex = isNarrow
+            ? writtenOperation == null
                 ? 4
                 : 5
+            : writtenOperation == null
+                ? isCompactHeight
+                    ? 4
+                    : 5
+                : isCompactHeight
+                    ? 5
+                    : 6;
+        final answersFlex = isNarrow
+            ? 5
             : isCompactHeight
-                ? 5
-                : 6;
-        final answersFlex = isCompactHeight ? 3 : 4;
+                ? 3
+                : 4;
+        final activeHintIndex = _activeHintStepIndex(session);
+        final activeVisibleHint = _activeVisibleHint(session);
+        final activeSpokenHint = _activeSpokenHint(session);
+        final canRequestHint = _canRequestHint(session);
         final questionSpeech = _SpeechButtonData(
           clipKey: '$_speechSessionId:question:${session.exercise.id}',
           text: session.exercise.spokenText,
@@ -161,12 +306,13 @@ class _ExerciseViewState extends ConsumerState<_ExerciseView> {
           clipId: 'question:${session.exercise.id}',
         );
         final hintSpeech = _SpeechButtonData(
-          clipKey: '$_speechSessionId:hint:${session.exercise.id}',
-          text: session.exercise.spokenHint,
+          clipKey:
+              '$_speechSessionId:hint:${session.exercise.id}:$activeHintIndex',
+          text: activeSpokenHint,
           languageCode: languageCode,
           voiceId: voiceId,
           sessionId: _speechSessionId,
-          clipId: 'hint:${session.exercise.id}',
+          clipId: _hintClipId(session.exercise.id, activeHintIndex),
         );
 
         return Column(
@@ -188,6 +334,7 @@ class _ExerciseViewState extends ConsumerState<_ExerciseView> {
                   hasAskedHint: session.hasAskedHint,
                 ),
                 avatar: unicornAvatar,
+                stage: unicornStage,
                 emotion: _emotionForSession(
                   isCorrect: session.isCorrect,
                   hasAskedHint: session.hasAskedHint,
@@ -198,7 +345,7 @@ class _ExerciseViewState extends ConsumerState<_ExerciseView> {
                   levelId: session.level.id,
                   isCorrect: session.isCorrect,
                   hasAskedHint: session.hasAskedHint,
-                  hint: session.exercise.visibleHint,
+                  hint: activeVisibleHint,
                   unicornName: unicornName,
                 ),
                 writtenOperation: writtenOperation,
@@ -221,18 +368,22 @@ class _ExerciseViewState extends ConsumerState<_ExerciseView> {
             ],
             SizedBox(height: sectionGap),
             _HintButton(
-              onPressed: () async {
-                await speechPlayback.stop();
-                controller.showHint();
-                await audioService.playHintOpen();
-              },
+              onPressed: canRequestHint
+                  ? () async {
+                      await speechPlayback.stop();
+                      controller.showHint();
+                      await audioService.playHintOpen();
+                    }
+                  : null,
               languageCode: languageCode,
+              isFollowUp: session.hasAskedHint,
             ),
             SizedBox(height: sectionGap),
             Expanded(
               flex: answersFlex,
               child: ResponsiveActionGrid(
-                minRows: 2,
+                columns: isNarrow ? 1 : 2,
+                minRows: isNarrow ? 4 : 2,
                 gap: isCompactHeight ? AppSpacing.sm : AppSpacing.md,
                 children: [
                   for (final option in session.exercise.options)
@@ -289,7 +440,7 @@ class _ExerciseViewState extends ConsumerState<_ExerciseView> {
       return false;
     }
 
-    return session.exercise.type == 'count' || session.hasAskedHint;
+    return session.exercise.type == 'count';
   }
 
   void _prepareSpeechFor(
@@ -317,18 +468,80 @@ class _ExerciseViewState extends ConsumerState<_ExerciseView> {
             id: 'question:${session.exercise.id}',
             text: session.exercise.spokenText,
           ),
-          SpeechClip(
-            id: 'hint:${session.exercise.id}',
-            text: session.exercise.spokenHint,
-          ),
+          ..._hintSpeechClips(session),
         ],
       ),
     );
+  }
+
+  List<SpeechClip> _hintSpeechClips(GameSessionState session) {
+    final steps = session.exercise.hintSteps;
+    if (steps.isEmpty) {
+      return [
+        SpeechClip(
+          id: _hintClipId(session.exercise.id, 0),
+          text: session.exercise.spokenHint,
+        ),
+      ];
+    }
+
+    return [
+      for (var index = 0; index < steps.length; index++)
+        SpeechClip(
+          id: _hintClipId(session.exercise.id, index),
+          text: steps[index].spokenText,
+        ),
+    ];
+  }
+
+  int _activeHintStepIndex(GameSessionState session) {
+    final stepCount = session.exercise.hintSteps.length;
+    if (stepCount == 0 || session.hintStepIndex < 0) {
+      return 0;
+    }
+
+    return session.hintStepIndex >= stepCount
+        ? stepCount - 1
+        : session.hintStepIndex;
+  }
+
+  String _activeVisibleHint(GameSessionState session) {
+    final steps = session.exercise.hintSteps;
+    if (steps.isEmpty) {
+      return session.exercise.visibleHint;
+    }
+
+    return steps[_activeHintStepIndex(session)].visibleText;
+  }
+
+  String _activeSpokenHint(GameSessionState session) {
+    final steps = session.exercise.hintSteps;
+    if (steps.isEmpty) {
+      return session.exercise.spokenHint;
+    }
+
+    return steps[_activeHintStepIndex(session)].spokenText;
+  }
+
+  bool _canRequestHint(GameSessionState session) {
+    if (session.selectedAnswer != null || session.isAdvancing) {
+      return false;
+    }
+    if (!session.hasAskedHint) {
+      return true;
+    }
+
+    final stepCount = session.exercise.hintSteps.length;
+    return stepCount > 0 && session.hintStepIndex < stepCount - 1;
   }
 }
 
 String _createSpeechSessionId(String levelId) {
   return '$levelId-${DateTime.now().microsecondsSinceEpoch}';
+}
+
+String _hintClipId(String exerciseId, int hintStepIndex) {
+  return 'hint:$exerciseId:$hintStepIndex';
 }
 
 enum _UnicornEmotion {
@@ -464,14 +677,10 @@ String _levelMissionEs(String levelId, String worldId, String unicornName) {
 
 String _levelMissionCa(String levelId, String worldId, String unicornName) {
   return switch (levelId) {
-    'heart_forest_01' =>
-      'Ajuda $unicornName a trobar els primers cors màgics.',
-    'heart_forest_02' =>
-      'Ajuda $unicornName a omplir el camí amb més cors.',
-    'heart_forest_03' =>
-      'Ajunta grups petits per obrir una porta del bosc.',
-    'heart_forest_04' =>
-      'Suma els regals del bosc perquè $unicornName avanci.',
+    'heart_forest_01' => 'Ajuda $unicornName a trobar els primers cors màgics.',
+    'heart_forest_02' => 'Ajuda $unicornName a omplir el camí amb més cors.',
+    'heart_forest_03' => 'Ajunta grups petits per obrir una porta del bosc.',
+    'heart_forest_04' => 'Suma els regals del bosc perquè $unicornName avanci.',
     'heart_forest_05' =>
       'Reparteix els objectes amb calma per deixar el bosc endreçat.',
     'heart_forest_boss' =>
@@ -488,6 +697,7 @@ class _UnicornGuide extends StatelessWidget {
   const _UnicornGuide({
     required this.title,
     required this.avatar,
+    required this.stage,
     required this.emotion,
     required this.message,
     required this.writtenOperation,
@@ -496,6 +706,7 @@ class _UnicornGuide extends StatelessWidget {
 
   final String title;
   final UnicornAvatar avatar;
+  final UnicornAvatarStage stage;
   final _UnicornEmotion emotion;
   final String message;
   final _WrittenOperationData? writtenOperation;
@@ -505,15 +716,23 @@ class _UnicornGuide extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < AppBreakpoints.narrowWidth;
         final isCompact = constraints.maxWidth < 420;
         final hasOperation = writtenOperation != null;
         final availableHeight = constraints.maxHeight;
-        final padding = AppSpacing.md * 2;
-        final portraitSize = (availableHeight - padding).clamp(
-          hasOperation ? 124.0 : 104.0,
-          hasOperation ? 260.0 : 230.0,
-        ).toDouble();
-        final useCompactText = isCompact || availableHeight < 210;
+        const padding = AppSpacing.md * 2;
+        final portraitSize = isNarrow
+            ? math
+                .min(availableHeight * 0.42, constraints.maxWidth * 0.42)
+                .clamp(96.0, 170.0)
+                .toDouble()
+            : (availableHeight - padding)
+                .clamp(
+                  hasOperation ? 180.0 : 160.0,
+                  hasOperation ? 300.0 : 280.0,
+                )
+                .toDouble();
+        final useCompactText = isNarrow || isCompact || availableHeight < 210;
 
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -525,48 +744,43 @@ class _UnicornGuide extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              children: [
-                _UnicornPortrait(
-                  avatar: avatar,
-                  emotion: emotion,
-                  size: portraitSize,
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
+            child: isNarrow
+                ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: _UnicornPortrait(
+                          avatar: avatar,
+                          stage: stage,
+                          emotion: emotion,
+                          size: portraitSize,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Expanded(
+                          Flexible(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
                                   title,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: useCompactText
-                                      ? AppTypography.guideTitleCompact
-                                      : AppTypography.guideTitle,
+                                  textAlign: TextAlign.center,
+                                  style: AppTypography.guideTitleCompact,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   message,
-                                  maxLines: hasOperation
-                                      ? isCompact
-                                          ? 2
-                                          : 3
-                                      : isCompact
-                                          ? 3
-                                          : 4,
+                                  maxLines: hasOperation ? 2 : 3,
                                   overflow: TextOverflow.ellipsis,
-                                  style: useCompactText
-                                      ? AppTypography.guideBodyCompact
-                                      : AppTypography.guideBody,
+                                  textAlign: TextAlign.center,
+                                  style: AppTypography.guideBodyCompact,
                                 ),
                               ],
                             ),
@@ -581,14 +795,77 @@ class _UnicornGuide extends StatelessWidget {
                         const SizedBox(height: AppSpacing.sm),
                         _WrittenOperation(
                           operation: operation,
-                          compact: useCompactText,
+                          compact: true,
                         ),
                       ],
                     ],
+                  )
+                : Row(
+                    children: [
+                      _UnicornPortrait(
+                        avatar: avatar,
+                        stage: stage,
+                        emotion: emotion,
+                        size: portraitSize,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: useCompactText
+                                            ? AppTypography.guideTitleCompact
+                                            : AppTypography.guideTitle,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        message,
+                                        maxLines: hasOperation
+                                            ? isCompact
+                                                ? 2
+                                                : 3
+                                            : isCompact
+                                                ? 3
+                                                : 4,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: useCompactText
+                                            ? AppTypography.guideBodyCompact
+                                            : AppTypography.guideBody,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (speech != null) ...[
+                                  const SizedBox(width: AppSpacing.sm),
+                                  _GuideSpeakButton(speech: speech!),
+                                ],
+                              ],
+                            ),
+                            if (writtenOperation case final operation?) ...[
+                              const SizedBox(height: AppSpacing.sm),
+                              _WrittenOperation(
+                                operation: operation,
+                                compact: useCompactText,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ),
         );
       },
@@ -720,11 +997,13 @@ class _GuideSpeakButton extends StatelessWidget {
 class _UnicornPortrait extends StatelessWidget {
   const _UnicornPortrait({
     required this.avatar,
+    required this.stage,
     required this.emotion,
     required this.size,
   });
 
   final UnicornAvatar avatar;
+  final UnicornAvatarStage stage;
   final _UnicornEmotion emotion;
   final double size;
 
@@ -746,8 +1025,9 @@ class _UnicornPortrait extends StatelessWidget {
           );
         },
         child: UnicornAvatarImage(
-          key: ValueKey('${avatar.id}:${emotion.name}'),
+          key: ValueKey('${avatar.id}:${stage.id}:${emotion.name}'),
           avatar: avatar,
+          stage: stage,
           emotion: _avatarEmotionFor(emotion),
           fallback: _UnicornFallback(size: size),
         ),
@@ -1067,23 +1347,84 @@ class _HintButton extends StatelessWidget {
   const _HintButton({
     required this.onPressed,
     required this.languageCode,
+    required this.isFollowUp,
   });
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String languageCode;
+  final bool isFollowUp;
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onPressed != null;
+    final foreground = enabled
+        ? AppColors.purpleText
+        : AppColors.purpleText.withValues(alpha: 0.42);
+    final bulbColor = enabled
+        ? AppColors.starGold
+        : AppColors.starGold.withValues(alpha: 0.45);
+
     return SizedBox(
       height: 52,
-      child: OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: const Icon(Symbols.lightbulb_rounded),
-        label: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            _hintButtonLabel(languageCode),
-            style: AppTypography.button,
+      child: Material(
+        color: Colors.white.withValues(alpha: enabled ? 0.76 : 0.42),
+        borderRadius: BorderRadius.circular(18),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          splashColor: AppColors.starGold.withValues(alpha: 0.24),
+          highlightColor: AppColors.starGold.withValues(alpha: 0.14),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color:
+                    AppColors.starGold.withValues(alpha: enabled ? 0.62 : 0.28),
+                width: 1.8,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.purpleText.withValues(alpha: 0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: bulbColor.withValues(alpha: 0.30),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Symbols.lightbulb_rounded,
+                      color: HSLColor.fromColor(bulbColor)
+                          .withLightness(enabled ? 0.42 : 0.62)
+                          .toColor(),
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _hintButtonLabel(languageCode, isFollowUp),
+                        style: AppTypography.button.copyWith(
+                          color: foreground,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -1091,8 +1432,12 @@ class _HintButton extends StatelessWidget {
   }
 }
 
-String _hintButtonLabel(String languageCode) {
-  return languageCode == 'ca-ES' ? 'Pista' : 'Pista';
+String _hintButtonLabel(String languageCode, bool isFollowUp) {
+  if (!isFollowUp) {
+    return 'Pista';
+  }
+
+  return languageCode == 'ca-ES' ? 'Una altra pista' : 'Otra pista';
 }
 
 class _AnswerTile extends StatefulWidget {
@@ -1134,19 +1479,23 @@ class _AnswerTileState extends State<_AnswerTile> {
             ? AppColors.gentleError
             : AppColors.softLilac;
     final fillColor = isAnswered && isCorrect
-        ? AppColors.successGreen.withValues(alpha: 0.34)
+        ? AppColors.successGreen.withValues(alpha: 0.28)
         : isSelected
-            ? AppColors.gentleError.withValues(alpha: 0.34)
-            : Colors.white.withValues(alpha: 0.94);
+            ? AppColors.gentleError.withValues(alpha: 0.28)
+            : AppColors.softLilac.withValues(alpha: 0.18);
     final borderColor = isAnswered && isCorrect
         ? AppColors.successGreen.withValues(alpha: 0.92)
         : isSelected
             ? AppColors.gentleError.withValues(alpha: 0.92)
-            : AppColors.lilacAccent.withValues(alpha: 0.58);
+            : Colors.white.withValues(alpha: 0.64);
     final textColor = isAnswered && isCorrect
-        ? HSLColor.fromColor(AppColors.successGreen).withLightness(0.28).toColor()
+        ? HSLColor.fromColor(AppColors.successGreen)
+            .withLightness(0.28)
+            .toColor()
         : isSelected
-            ? HSLColor.fromColor(AppColors.gentleError).withLightness(0.30).toColor()
+            ? HSLColor.fromColor(AppColors.gentleError)
+                .withLightness(0.30)
+                .toColor()
             : AppColors.purpleText;
     final scale = _isPressed
         ? 0.95
@@ -1155,6 +1504,9 @@ class _AnswerTileState extends State<_AnswerTile> {
             : 1.0;
     final shadowOpacity = isSelected || (isAnswered && isCorrect) ? 0.24 : 0.14;
     final showFeedbackBadge = isAnswered && (isSelected || isCorrect);
+    final numberChipBorderColor = isAnswered && (isSelected || isCorrect)
+        ? accentColor.withValues(alpha: 0.36)
+        : Colors.white.withValues(alpha: 0.82);
 
     return Center(
       child: FractionallySizedBox(
@@ -1214,14 +1566,41 @@ class _AnswerTileState extends State<_AnswerTile> {
                         ),
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: AnimatedDefaultTextStyle(
+                          child: AnimatedContainer(
                             duration: const Duration(milliseconds: 140),
                             curve: Curves.easeOut,
-                            style: AppTypography.answerNumber.copyWith(
-                              color: textColor,
-                              fontSize: isSelected ? 46 : 42,
+                            constraints: const BoxConstraints(
+                              minWidth: 74,
+                              minHeight: 68,
                             ),
-                            child: Text('${widget.value}'),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isSelected ? 26 : 24,
+                              vertical: isSelected ? 13 : 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.94),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: numberChipBorderColor,
+                                width: 1.6,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accentColor.withValues(alpha: 0.14),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 140),
+                              curve: Curves.easeOut,
+                              style: AppTypography.answerNumber.copyWith(
+                                color: textColor,
+                                fontSize: isSelected ? 46 : 42,
+                              ),
+                              child: Text('${widget.value}'),
+                            ),
                           ),
                         ),
                       ),
@@ -1464,6 +1843,8 @@ class _LevelCompleteView extends ConsumerStatefulWidget {
     required this.nextLevelId,
     required this.unicornName,
     required this.unicornAvatar,
+    required this.unicornStage,
+    required this.newUnicornStage,
     required this.onRepeatLevel,
   });
 
@@ -1475,6 +1856,8 @@ class _LevelCompleteView extends ConsumerStatefulWidget {
   final String? nextLevelId;
   final String unicornName;
   final UnicornAvatar unicornAvatar;
+  final UnicornAvatarStage unicornStage;
+  final UnicornAvatarStage? newUnicornStage;
   final FutureOr<void> Function() onRepeatLevel;
 
   @override
@@ -1483,6 +1866,7 @@ class _LevelCompleteView extends ConsumerStatefulWidget {
 
 class _LevelCompleteViewState extends ConsumerState<_LevelCompleteView> {
   var _showRewardModal = true;
+  var _showEvolutionModal = true;
 
   @override
   void initState() {
@@ -1493,14 +1877,16 @@ class _LevelCompleteViewState extends ConsumerState<_LevelCompleteView> {
   @override
   void didUpdateWidget(covariant _LevelCompleteView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.newRewardId != widget.newRewardId) {
+    if (oldWidget.newRewardId != widget.newRewardId ||
+        oldWidget.newUnicornStage != widget.newUnicornStage) {
       _showRewardModal = true;
+      _showEvolutionModal = true;
       _playRewardSoundIfNeeded();
     }
   }
 
   void _playRewardSoundIfNeeded() {
-    if (widget.newRewardId == null) {
+    if (widget.newRewardId == null && widget.newUnicornStage == null) {
       return;
     }
 
@@ -1511,6 +1897,9 @@ class _LevelCompleteViewState extends ConsumerState<_LevelCompleteView> {
   Widget build(BuildContext context) {
     final shouldShowRewardModal =
         widget.newRewardId != null && _showRewardModal;
+    final shouldShowEvolutionModal = widget.newUnicornStage != null &&
+        _showEvolutionModal &&
+        !shouldShowRewardModal;
     final rewardsState = shouldShowRewardModal
         ? ref.watch(rewardsProvider)
         : const AsyncValue<List<Reward>>.data([]);
@@ -1522,6 +1911,7 @@ class _LevelCompleteViewState extends ConsumerState<_LevelCompleteView> {
     final nextLevelId = widget.nextLevelId;
     final unicornName = widget.unicornName;
     final unicornAvatar = widget.unicornAvatar;
+    final unicornStage = widget.unicornStage;
     final canRepeatLevel = correctAnswers < totalQuestions;
 
     return LayoutBuilder(
@@ -1538,12 +1928,10 @@ class _LevelCompleteViewState extends ConsumerState<_LevelCompleteView> {
             const Spacer(),
             _UnicornPortrait(
               avatar: unicornAvatar,
+              stage: unicornStage,
               emotion: _UnicornEmotion.celebrating,
               size: unicornSize,
-            )
-                .animate()
-                .fadeIn(duration: 260.ms)
-                .scale(
+            ).animate().fadeIn(duration: 260.ms).scale(
                   begin: const Offset(0.88, 0.88),
                   end: const Offset(1, 1),
                   curve: Curves.easeOutBack,
@@ -1665,6 +2053,16 @@ class _LevelCompleteViewState extends ConsumerState<_LevelCompleteView> {
                   ),
                 ),
               ),
+            if (shouldShowEvolutionModal)
+              Positioned.fill(
+                child: _UnicornEvolutionOverlay(
+                  avatar: unicornAvatar,
+                  stage: widget.newUnicornStage!,
+                  unicornName: unicornName,
+                  languageCode: languageCode,
+                  onClose: () => setState(() => _showEvolutionModal = false),
+                ),
+              ),
           ],
         );
       },
@@ -1700,8 +2098,8 @@ class _RewardUnlockOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        ModalBarrier(
-          color: AppColors.purpleText.withValues(alpha: 0.32),
+        const ModalBarrier(
+          color: Colors.transparent,
           dismissible: false,
         ),
         SafeArea(
@@ -1731,7 +2129,7 @@ class _RewardUnlockOverlay extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Symbols.auto_awesome_rounded,
                           color: AppColors.hintOrange,
                           size: 42,
@@ -1757,10 +2155,7 @@ class _RewardUnlockOverlay extends StatelessWidget {
                           child: isLoading
                               ? const Center(child: CircularProgressIndicator())
                               : _RewardUnlockVisual(reward: reward),
-                        )
-                            .animate()
-                            .fadeIn(duration: 220.ms)
-                            .scale(
+                        ).animate().fadeIn(duration: 220.ms).scale(
                               begin: const Offset(0.78, 0.78),
                               end: const Offset(1, 1),
                               curve: Curves.easeOutBack,
@@ -1807,10 +2202,125 @@ class _RewardUnlockOverlay extends StatelessWidget {
                     ),
                   ),
                 ),
-              )
-                  .animate()
-                  .fadeIn(duration: 180.ms)
-                  .scale(
+              ).animate().fadeIn(duration: 180.ms).scale(
+                    begin: const Offset(0.9, 0.9),
+                    end: const Offset(1, 1),
+                    curve: Curves.easeOutBack,
+                  ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _UnicornEvolutionOverlay extends StatelessWidget {
+  const _UnicornEvolutionOverlay({
+    required this.avatar,
+    required this.stage,
+    required this.unicornName,
+    required this.languageCode,
+    required this.onClose,
+  });
+
+  final UnicornAvatar avatar;
+  final UnicornAvatarStage stage;
+  final String unicornName;
+  final String languageCode;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final isCatalan = languageCode == 'ca-ES';
+
+    return Stack(
+      children: [
+        const ModalBarrier(
+          color: Colors.transparent,
+          dismissible: false,
+        ),
+        SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: AppColors.magicPink.withValues(alpha: 0.75),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.purpleText.withValues(alpha: 0.24),
+                        blurRadius: 28,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Symbols.auto_awesome_rounded,
+                          color: AppColors.magicPink,
+                          size: 42,
+                        )
+                            .animate(
+                              onPlay: (controller) => controller.repeat(),
+                            )
+                            .shimmer(
+                              duration: 1200.ms,
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          isCatalan
+                              ? '$unicornName ha evolucionat!'
+                              : '$unicornName ha evolucionado!',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.pageTitle,
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        SizedBox.square(
+                          dimension: 170,
+                          child: UnicornAvatarImage(
+                            avatar: avatar,
+                            stage: stage,
+                            emotion: UnicornAvatarEmotion.celebrating,
+                          ),
+                        ).animate().fadeIn(duration: 220.ms).scale(
+                              begin: const Offset(0.78, 0.78),
+                              end: const Offset(1, 1),
+                              curve: Curves.easeOutBack,
+                            ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          isCatalan
+                              ? 'Nova evolucio desbloquejada'
+                              : 'Nueva evolucion desbloqueada',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.cardTitle,
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: onClose,
+                            child: Text(isCatalan ? 'Genial' : 'Genial'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ).animate().fadeIn(duration: 180.ms).scale(
                     begin: const Offset(0.9, 0.9),
                     end: const Offset(1, 1),
                     curve: Curves.easeOutBack,

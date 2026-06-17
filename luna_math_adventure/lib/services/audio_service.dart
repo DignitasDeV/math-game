@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
+import 'profile_controller.dart';
 import 'speech_playback_controller.dart';
 
 enum AudioCue {
@@ -35,13 +36,21 @@ abstract class AudioService {
 }
 
 class LocalAudioService implements AudioService {
-  LocalAudioService(this._player);
+  LocalAudioService(
+    this._player, {
+    required bool soundEffectsEnabled,
+  }) : _soundEffectsEnabled = soundEffectsEnabled;
 
   final AudioPlayer _player;
+  final bool _soundEffectsEnabled;
   Future<Set<String>>? _availableAssets;
 
   @override
   Future<void> playCue(AudioCue cue) async {
+    if (!_soundEffectsEnabled) {
+      return;
+    }
+
     try {
       await _player.stop();
       if (!await _assetExists(cue.assetPath)) {
@@ -101,9 +110,14 @@ class LocalAudioService implements AudioService {
 }
 
 final audioServiceProvider = Provider<AudioService>((ref) {
+  final soundEffectsEnabled =
+      ref.watch(activeProfileProvider)?.soundEffectsEnabled ?? true;
   final player = AudioPlayer();
   ref.onDispose(player.dispose);
-  return LocalAudioService(player);
+  return LocalAudioService(
+    player,
+    soundEffectsEnabled: soundEffectsEnabled,
+  );
 });
 
 Future<void> playTapAndRun(

@@ -10,6 +10,7 @@ class PlayerProfile {
     required this.language,
     required this.unicornAvatar,
     required this.ttsVoiceId,
+    this.soundEffectsEnabled = true,
   });
 
   final String id;
@@ -18,6 +19,7 @@ class PlayerProfile {
   final AppLanguage language;
   final UnicornAvatar unicornAvatar;
   final String ttsVoiceId;
+  final bool soundEffectsEnabled;
 
   PlayerProfile copyWith({
     String? id,
@@ -26,6 +28,7 @@ class PlayerProfile {
     AppLanguage? language,
     UnicornAvatar? unicornAvatar,
     String? ttsVoiceId,
+    bool? soundEffectsEnabled,
   }) {
     return PlayerProfile(
       id: id ?? this.id,
@@ -34,6 +37,7 @@ class PlayerProfile {
       language: language ?? this.language,
       unicornAvatar: unicornAvatar ?? this.unicornAvatar,
       ttsVoiceId: ttsVoiceId ?? this.ttsVoiceId,
+      soundEffectsEnabled: soundEffectsEnabled ?? this.soundEffectsEnabled,
     );
   }
 
@@ -45,6 +49,7 @@ class PlayerProfile {
       'language': language.ttsCode,
       'unicornAvatarId': unicornAvatar.id,
       'ttsVoiceId': ttsVoiceId,
+      'soundEffectsEnabled': soundEffectsEnabled,
     };
   }
 
@@ -60,6 +65,7 @@ class PlayerProfile {
         language: language,
         voiceId: json['ttsVoiceId'] as String?,
       ),
+      soundEffectsEnabled: json['soundEffectsEnabled'] as bool? ?? true,
     );
   }
 }

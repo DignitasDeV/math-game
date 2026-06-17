@@ -186,6 +186,8 @@ class _HelpTopicCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _colorForExample(topic.exampleType);
     final iconColor = HSLColor.fromColor(color).withLightness(0.35).toColor();
+    final isNarrow =
+        MediaQuery.sizeOf(context).width < AppBreakpoints.narrowWidth;
 
     return _ReadableSurface(
       borderColor: color.withValues(alpha: isExpanded ? 0.55 : 0.34),
@@ -232,7 +234,7 @@ class _HelpTopicCard extends StatelessWidget {
                           ),
                           Text(
                             topic.title.get(languageCode),
-                            maxLines: 1,
+                            maxLines: isNarrow ? 2 : 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.cardTitle.copyWith(
                               color: AppColors.purpleText,
@@ -241,7 +243,9 @@ class _HelpTopicCard extends StatelessWidget {
                           ),
                           Text(
                             topic.summary.get(languageCode),
-                            maxLines: isExpanded ? 2 : 1,
+                            maxLines: isExpanded
+                                ? (isNarrow ? 3 : 2)
+                                : (isNarrow ? 2 : 1),
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.caption.copyWith(
                               color: AppColors.purpleText,
@@ -519,8 +523,10 @@ class _NumberExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Wrap(
+      alignment: WrapAlignment.spaceEvenly,
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.sm,
       children: [
         for (var value = 1; value <= 5; value++)
           Text(
@@ -601,12 +607,15 @@ class _CompareExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: AppSpacing.lg,
+      runSpacing: AppSpacing.md,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         _DotGroup(count: 3, iconColor: iconColor),
         Text(
-        '<',
+          '<',
           style: AppTypography.mathHorizontal.copyWith(color: iconColor),
         ),
         _DotGroup(count: 5, iconColor: iconColor),

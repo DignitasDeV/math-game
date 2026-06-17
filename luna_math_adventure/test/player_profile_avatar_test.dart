@@ -20,7 +20,23 @@ void main() {
       profile.toJson(),
       containsPair('ttsVoiceId', TtsVoiceOptions.defaultSpanishVoiceId),
     );
+    expect(profile.toJson(), containsPair('soundEffectsEnabled', true));
     expect(profile.toJson().containsKey('unicornVariant'), isFalse);
+  });
+
+  test('serializes disabled profile sound effects', () {
+    const profile = PlayerProfile(
+      id: 'child_1',
+      childName: 'Ada',
+      unicornName: 'Iris',
+      language: AppLanguage.spanish,
+      unicornAvatar: UnicornAvatar.avatar03,
+      ttsVoiceId: TtsVoiceOptions.defaultSpanishVoiceId,
+      soundEffectsEnabled: false,
+    );
+
+    expect(profile.soundEffectsEnabled, isFalse);
+    expect(profile.toJson(), containsPair('soundEffectsEnabled', false));
   });
 
   test('migrates legacy unicornia variant to avatar 1', () {
@@ -34,6 +50,7 @@ void main() {
 
     expect(profile.unicornAvatar, UnicornAvatar.avatar01);
     expect(profile.ttsVoiceId, TtsVoiceOptions.defaultSpanishVoiceId);
+    expect(profile.soundEffectsEnabled, isTrue);
   });
 
   test('migrates legacy unicorn variant to avatar 2', () {

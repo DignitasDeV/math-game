@@ -1,3 +1,5 @@
+import 'exercise_hint_step.dart';
+
 class Exercise {
   const Exercise({
     required this.id,
@@ -9,6 +11,7 @@ class Exercise {
     required this.spokenText,
     required this.visibleHint,
     required this.spokenHint,
+    this.hintSteps = const [],
     required this.answer,
     required this.options,
     required this.visualItemId,
@@ -25,6 +28,7 @@ class Exercise {
   final String spokenText;
   final String visibleHint;
   final String spokenHint;
+  final List<ExerciseHintStep> hintSteps;
   final int answer;
   final List<int> options;
   final String visualItemId;

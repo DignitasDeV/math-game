@@ -42,8 +42,43 @@ void main() {
     expect(candidates.every((candidate) => candidate.result <= 30), isTrue);
     expect(
       candidates.every(
-        (candidate) =>
-            (candidate.left % 10) + (candidate.right % 10) < 10,
+        (candidate) => (candidate.left % 10) + (candidate.right % 10) < 10,
+      ),
+      isTrue,
+    );
+  });
+
+  test('addition carry flag checks both operands when one has tens', () {
+    final candidates = const ExercisePoolGenerator().generate(
+      _level(
+        exerciseTypes: const ['addition'],
+        minNumber: 8,
+        maxNumber: 12,
+        maxResult: 20,
+        allowCarry: false,
+      ),
+    );
+
+    expect(candidates, isNotEmpty);
+    expect(
+      candidates.any(
+        (candidate) => candidate.left == 8 && candidate.right == 12,
+      ),
+      isFalse,
+    );
+    expect(
+      candidates.any(
+        (candidate) => candidate.left == 12 && candidate.right == 8,
+      ),
+      isFalse,
+    );
+    expect(
+      candidates.every(
+        (candidate) {
+          final hasTens = candidate.left >= 10 || candidate.right >= 10;
+          return !hasTens ||
+              (candidate.left % 10) + (candidate.right % 10) < 10;
+        },
       ),
       isTrue,
     );

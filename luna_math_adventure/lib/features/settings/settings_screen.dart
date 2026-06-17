@@ -14,6 +14,7 @@ import '../../models/tts_voice_option.dart';
 import '../../services/audio_service.dart';
 import '../../services/profile_controller.dart';
 import '../../services/profile_repository.dart';
+import '../../services/ui_copy.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -21,10 +22,12 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeProfile = ref.watch(activeProfileProvider);
+    final languageCode = activeProfile?.language.ttsCode ?? 'es-ES';
 
     return MagicScaffold(
-      title: 'Ajustes',
-      backgroundAssetPath: 'assets/images/backgrounds/home_background_screen.webp',
+      title: UiCopy.settings(languageCode),
+      backgroundAssetPath:
+          'assets/images/backgrounds/home_background_screen.webp',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -35,24 +38,48 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   AppScreenHeader(
                     icon: Symbols.tune_rounded,
-                    title: 'Ajustes',
+                    title: UiCopy.settings(languageCode),
                     subtitle: activeProfile == null
-                        ? 'No hay perfil activo.'
-                        : 'Perfil activo: ${activeProfile.childName}',
+                        ? UiCopy.text(
+                            languageCode,
+                            es: 'No hay perfil activo.',
+                            ca: 'No hi ha cap perfil actiu.',
+                          )
+                        : UiCopy.text(
+                            languageCode,
+                            es: 'Perfil activo: ${activeProfile.childName}',
+                            ca: 'Perfil actiu: ${activeProfile.childName}',
+                          ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   _SettingsCard(
                     icon: Symbols.group_rounded,
-                    label: 'Cambiar perfil',
-                    subtitle: 'Elige otro jugador de la familia',
+                    label: UiCopy.text(
+                      languageCode,
+                      es: 'Cambiar perfil',
+                      ca: 'Canviar perfil',
+                    ),
+                    subtitle: UiCopy.text(
+                      languageCode,
+                      es: 'Elige otro jugador de la familia',
+                      ca: 'Tria un altre jugador de la família',
+                    ),
                     color: AppColors.softLilac,
                     onPressed: () => context.go('/profiles'),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _SettingsCard(
                     icon: Symbols.person_add_rounded,
-                    label: 'Crear otro perfil',
-                    subtitle: 'Añade un nuevo jugador',
+                    label: UiCopy.text(
+                      languageCode,
+                      es: 'Crear otro perfil',
+                      ca: 'Crear un altre perfil',
+                    ),
+                    subtitle: UiCopy.text(
+                      languageCode,
+                      es: 'Añade un nuevo jugador',
+                      ca: 'Afegeix un jugador nou',
+                    ),
                     color: AppColors.skyBlue,
                     onPressed: () {
                       ref.read(onboardingDraftProvider.notifier).reset();
@@ -61,6 +88,8 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   if (activeProfile != null) ...[
                     const SizedBox(height: AppSpacing.lg),
+                    _SoundEffectsSettingsCard(profile: activeProfile),
+                    const SizedBox(height: AppSpacing.md),
                     _VoiceSettingsPanel(profile: activeProfile),
                   ],
                   const SizedBox(height: AppSpacing.lg),
@@ -71,12 +100,105 @@ class SettingsScreen extends ConsumerWidget {
           SizedBox(
             height: 56,
             child: OutlinedButton.icon(
-              onPressed: () => playTapAndRun(context, () => context.go('/home')),
+              onPressed: () =>
+                  playTapAndRun(context, () => context.go('/home')),
               icon: const Icon(Symbols.home_rounded),
-              label: const Text('Volver al inicio'),
+              label: Text(UiCopy.text(
+                languageCode,
+                es: 'Volver al inicio',
+                ca: "Tornar a l'inici",
+              )),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SoundEffectsSettingsCard extends ConsumerWidget {
+  const _SoundEffectsSettingsCard({required this.profile});
+
+  final PlayerProfile profile;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final languageCode = profile.language.ttsCode;
+    const color = AppColors.softMint;
+    final iconColor = HSLColor.fromColor(color).withLightness(0.35).toColor();
+    final isNarrow =
+        MediaQuery.sizeOf(context).width < AppBreakpoints.narrowWidth;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withValues(alpha: 0.24),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: isNarrow ? AppSpacing.md : AppSpacing.xl,
+          vertical: AppSpacing.lg,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: isNarrow ? 44 : 48,
+              height: isNarrow ? 44 : 48,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.7),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                profile.soundEffectsEnabled
+                    ? Symbols.volume_up_rounded
+                    : Symbols.volume_off_rounded,
+                color: iconColor,
+              ),
+            ),
+            SizedBox(width: isNarrow ? AppSpacing.md : AppSpacing.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    UiCopy.text(
+                      languageCode,
+                      es: 'Efectos sonoros',
+                      ca: 'Efectes sonors',
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.cardTitle.copyWith(
+                      color: iconColor,
+                    ),
+                  ),
+                  Text(
+                    UiCopy.text(
+                      languageCode,
+                      es: 'Activa o desactiva toques, aciertos y premios',
+                      ca: 'Activa o desactiva tocs, encerts i premis',
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.caption,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Switch(
+              value: profile.soundEffectsEnabled,
+              onChanged: (value) {
+                ref
+                    .read(profileControllerProvider.notifier)
+                    .updateActiveProfileSoundEffects(value);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -94,6 +216,8 @@ class _VoiceSettingsPanel extends ConsumerWidget {
         voices.firstWhere((voice) => voice.isDefault);
     final iconColor =
         HSLColor.fromColor(AppColors.starGold).withLightness(0.35).toColor();
+    final isNarrow =
+        MediaQuery.sizeOf(context).width < AppBreakpoints.narrowWidth;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -111,8 +235,8 @@ class _VoiceSettingsPanel extends ConsumerWidget {
             Row(
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: isNarrow ? 44 : 48,
+                  height: isNarrow ? 44 : 48,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.7),
                     shape: BoxShape.circle,
@@ -125,7 +249,13 @@ class _VoiceSettingsPanel extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
-                    'Voz',
+                    UiCopy.text(
+                      profile.language.ttsCode,
+                      es: 'Voz',
+                      ca: 'Veu',
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTypography.cardTitle.copyWith(
                       color: iconColor,
                     ),
@@ -165,7 +295,11 @@ class _VoiceSettingsPanel extends ConsumerWidget {
                 sessionId: 'settings-${profile.id}',
                 clipId: 'voice-sample:${selectedVoice.id}',
                 filled: true,
-                label: 'Probar voz',
+                label: UiCopy.text(
+                  profile.language.ttsCode,
+                  es: 'Probar voz',
+                  ca: 'Provar veu',
+                ),
               ),
             ),
           ],
@@ -193,6 +327,10 @@ class _SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconColor = HSLColor.fromColor(color).withLightness(0.35).toColor();
+    final isNarrow =
+        MediaQuery.sizeOf(context).width < AppBreakpoints.narrowWidth;
+    final horizontalPadding = isNarrow ? AppSpacing.md : AppSpacing.xl;
+    final gap = isNarrow ? AppSpacing.md : AppSpacing.lg;
 
     return Material(
       color: color.withValues(alpha: 0.15),
@@ -202,36 +340,44 @@ class _SettingsCard extends StatelessWidget {
         onTap: () => playTapAndRun(context, onPressed),
         splashColor: color.withValues(alpha: 0.3),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
             vertical: AppSpacing.lg,
           ),
           child: Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: isNarrow ? 44 : 48,
+                height: isNarrow ? 44 : 48,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.7),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: iconColor),
               ),
-              const SizedBox(width: AppSpacing.lg),
+              SizedBox(width: gap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTypography.cardTitle.copyWith(
                         color: iconColor,
                       ),
                     ),
-                    Text(subtitle, style: AppTypography.caption),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.caption,
+                    ),
                   ],
                 ),
               ),
+              SizedBox(width: isNarrow ? AppSpacing.sm : AppSpacing.md),
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: iconColor,

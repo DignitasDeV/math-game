@@ -1,16 +1,13 @@
-import 'dart:math';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/exercise.dart';
 import '../../models/exercise_template.dart';
 import '../../models/level_config.dart';
 import '../../models/localized_text.dart';
-import '../../models/operation_candidate.dart';
 import '../../models/visual_item.dart';
 import '../../services/content_repository.dart';
 import '../../services/exercise_generator.dart';
-import '../../services/exercise_pool_generator.dart';
+import '../../services/exercise_session_planner.dart';
 import '../../services/profile_controller.dart';
 
 enum PracticeTopic {
@@ -58,9 +55,7 @@ enum PracticeDifficulty {
   final int practiceSortOrder;
 
   String label(String languageCode) {
-    return languageCode == 'ca-ES'
-        ? '1-$maxNumber'
-        : '1-$maxNumber';
+    return languageCode == 'ca-ES' ? '1-$maxNumber' : '1-$maxNumber';
   }
 }
 
@@ -83,6 +78,7 @@ class PracticeSessionState {
     this.selectedAnswer,
     this.isCorrect,
     this.hasAskedHint = false,
+    this.hintStepIndex = -1,
     this.isComplete = false,
   });
 
@@ -93,6 +89,7 @@ class PracticeSessionState {
   final int? selectedAnswer;
   final bool? isCorrect;
   final bool hasAskedHint;
+  final int hintStepIndex;
   final bool isComplete;
 
   int get questionsToComplete => practiceQuestionsToComplete;
@@ -104,6 +101,7 @@ class PracticeSessionState {
     int? selectedAnswer,
     bool? isCorrect,
     bool? hasAskedHint,
+    int? hintStepIndex,
     bool? isComplete,
     bool clearAnswer = false,
   }) {
@@ -112,9 +110,11 @@ class PracticeSessionState {
       exercise: exercise ?? this.exercise,
       questionIndex: questionIndex ?? this.questionIndex,
       correctAnswers: correctAnswers ?? this.correctAnswers,
-      selectedAnswer: clearAnswer ? null : selectedAnswer ?? this.selectedAnswer,
+      selectedAnswer:
+          clearAnswer ? null : selectedAnswer ?? this.selectedAnswer,
       isCorrect: clearAnswer ? null : isCorrect ?? this.isCorrect,
       hasAskedHint: clearAnswer ? false : hasAskedHint ?? this.hasAskedHint,
+      hintStepIndex: clearAnswer ? -1 : hintStepIndex ?? this.hintStepIndex,
       isComplete: isComplete ?? this.isComplete,
     );
   }
@@ -132,27 +132,23 @@ class PracticeSessionController
   PracticeSessionController(this._ref) : super(const AsyncValue.data(null));
 
   final Ref _ref;
-  final _random = Random();
-  final _poolGenerator = const ExercisePoolGenerator();
-  final _recentKeys = <String>[];
 
   late PracticeSessionConfig _config;
   late LevelConfig _level;
   late List<ExerciseTemplate> _templates;
   late List<VisualItem> _visualItems;
-  late List<OperationCandidate> _pool;
+  late ExerciseSessionPlanner _planner;
 
   Future<void> start(PracticeSessionConfig config) async {
     state = const AsyncValue.loading();
     _config = config;
     _level = buildPracticeLevel(config);
-    _recentKeys.clear();
 
     try {
       final content = _ref.read(contentRepositoryProvider);
       _templates = await content.loadExerciseTemplates();
       _visualItems = await content.loadVisualItems();
-      _pool = _createShuffledPool();
+      _planner = ExerciseSessionPlanner(level: _level);
 
       state = AsyncValue.data(
         PracticeSessionState(
@@ -207,7 +203,26 @@ class PracticeSessionController
       return;
     }
 
-    state = AsyncValue.data(current.copyWith(hasAskedHint: true));
+    state = AsyncValue.data(
+      current.copyWith(
+        hasAskedHint: true,
+        hintStepIndex: _nextHintStepIndex(current),
+      ),
+    );
+  }
+
+  int _nextHintStepIndex(PracticeSessionState current) {
+    final stepCount = current.exercise.hintSteps.length;
+    if (stepCount <= 1) {
+      return 0;
+    }
+
+    if (!current.hasAskedHint || current.hintStepIndex < 0) {
+      return 0;
+    }
+
+    final nextIndex = current.hintStepIndex + 1;
+    return nextIndex >= stepCount ? stepCount - 1 : nextIndex;
   }
 
   void nextExercise() {
@@ -232,27 +247,8 @@ class PracticeSessionController
     );
   }
 
-  List<OperationCandidate> _createShuffledPool() {
-    final pool = _poolGenerator.generate(_level);
-    pool.shuffle(_random);
-    return pool;
-  }
-
   Exercise _nextExercise() {
-    if (_pool.isEmpty) {
-      _pool = _createShuffledPool();
-    }
-
-    var candidateIndex = _pool.indexWhere(
-      (candidate) => !_recentKeys.contains(candidate.key),
-    );
-    if (candidateIndex == -1) {
-      _recentKeys.clear();
-      candidateIndex = 0;
-    }
-
-    final candidate = _pool.removeAt(candidateIndex);
-    _markRecent(candidate);
+    final candidate = _planner.next();
 
     return _ref.read(exerciseGeneratorProvider).buildExercise(
           level: _level,
@@ -262,19 +258,12 @@ class PracticeSessionController
           profile: _ref.read(activeProfileProvider),
         );
   }
-
-  void _markRecent(OperationCandidate candidate) {
-    _recentKeys.add(candidate.key);
-    if (_recentKeys.length > 10) {
-      _recentKeys.removeAt(0);
-    }
-  }
 }
 
 LevelConfig buildPracticeLevel(PracticeSessionConfig config) {
   final maxNumber = config.difficulty.maxNumber;
   return LevelConfig(
-    id: 'practice_${config.topic.name}_${maxNumber}',
+    id: 'practice_${config.topic.name}_$maxNumber',
     worldId: 'practice',
     title: LocalizedText(
       es: config.topic.title('es-ES'),

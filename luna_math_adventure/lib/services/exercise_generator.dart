@@ -8,6 +8,8 @@ import '../models/level_config.dart';
 import '../models/operation_candidate.dart';
 import '../models/player_profile.dart';
 import '../models/visual_item.dart';
+import 'exercise_hint_generator.dart';
+import 'localized_grammar.dart';
 import 'option_generator.dart';
 
 abstract class ExerciseGenerator {
@@ -24,11 +26,14 @@ class DynamicExerciseGenerator implements ExerciseGenerator {
   DynamicExerciseGenerator({
     Random? random,
     OptionGenerator? optionGenerator,
+    ExerciseHintGenerator? hintGenerator,
   })  : _random = random ?? Random(),
-        _optionGenerator = optionGenerator ?? NearbyOptionGenerator();
+        _optionGenerator = optionGenerator ?? NearbyOptionGenerator(),
+        _hintGenerator = hintGenerator ?? const StrategyExerciseHintGenerator();
 
   final Random _random;
   final OptionGenerator _optionGenerator;
+  final ExerciseHintGenerator _hintGenerator;
 
   @override
   Exercise buildExercise({
@@ -45,6 +50,11 @@ class DynamicExerciseGenerator implements ExerciseGenerator {
       operation: operation,
       visualItem: visualItem,
       profile: profile,
+      languageCode: languageCode,
+    );
+    final hints = _hintGenerator.hintsFor(
+      operation: operation,
+      visualItem: visualItem,
       languageCode: languageCode,
     );
     final maxOption = max(
@@ -66,19 +76,15 @@ class DynamicExerciseGenerator implements ExerciseGenerator {
         template.spokenPattern.get(languageCode),
         replacements,
       ),
-      visibleHint: _apply(
-        template.hintPattern.get(languageCode),
-        replacements,
-      ),
-      spokenHint: _apply(
-        template.spokenHintPattern.get(languageCode),
-        replacements,
-      ),
+      visibleHint: hints.visibleHint,
+      spokenHint: hints.spokenHint,
+      hintSteps: hints.steps,
       answer: operation.result,
       options: _optionGenerator.optionsFor(
         answer: operation.result,
         min: 0,
         max: maxOption,
+        operation: operation,
       )..shuffle(_random),
       visualItemId: visualItem.id,
       visualItemAssetPath: visualItem.assetPath,
@@ -123,32 +129,55 @@ class DynamicExerciseGenerator implements ExerciseGenerator {
       'b': '${operation.right}',
       'tens': '${operation.right}',
       'units': '${operation.result}',
-      'aWords': _numberWord(operation.left, languageCode),
-      'bWords': _numberWord(operation.right, languageCode),
-      'tensWords': _numberWord(operation.right, languageCode),
-      'unitsWords': _numberWord(operation.result, languageCode),
-      'tensLabel': _tensLabel(operation.right, languageCode),
+      'aWords': LocalizedGrammar.numberWord(operation.left, languageCode),
+      'bWords': LocalizedGrammar.numberWord(operation.right, languageCode),
+      'tensWords': LocalizedGrammar.numberWord(
+        operation.right,
+        languageCode,
+        feminine: true,
+      ),
+      'unitsWords': LocalizedGrammar.numberWord(
+        operation.result,
+        languageCode,
+        feminine: true,
+      ),
+      'tensLabel': LocalizedGrammar.tensLabel(operation.right, languageCode),
       'itemSingular': visualItem.singularLabel.get(languageCode),
       'itemPlural': visualItem.pluralLabel.get(languageCode),
       'itemPluralWithArticle':
           visualItem.pluralWithArticleLabel.get(languageCode),
-      'aItemLabel': _itemLabel(operation.left, visualItem, languageCode),
-      'bItemLabel': _itemLabel(operation.right, visualItem, languageCode),
-      'countQuestion': _countQuestion(visualItem, languageCode),
-      'totalQuestion': _totalQuestion(visualItem, languageCode),
-      'additionHint': _additionHint(operation, languageCode),
-      'subtractionHint': _subtractionHint(operation, languageCode),
-      'remainingQuestion': _remainingQuestion(visualItem, languageCode),
-      'remainingItemsPronoun': _remainingItemsPronoun(
-        visualItem,
-        languageCode,
-      ),
-      'aSpokenItemCount': _spokenItemCountPhrase(
+      'aItemLabel': LocalizedGrammar.itemLabel(
         operation.left,
         visualItem,
         languageCode,
       ),
-      'bSpokenItemCount': _spokenItemCountPhrase(
+      'bItemLabel': LocalizedGrammar.itemLabel(
+        operation.right,
+        visualItem,
+        languageCode,
+      ),
+      'countQuestion': LocalizedGrammar.countQuestion(
+        visualItem,
+        languageCode,
+      ),
+      'totalQuestion': LocalizedGrammar.totalQuestion(
+        visualItem,
+        languageCode,
+      ),
+      'remainingQuestion': LocalizedGrammar.remainingQuestion(
+        visualItem,
+        languageCode,
+      ),
+      'remainingItemsPronoun': LocalizedGrammar.remainingItemsPronoun(
+        visualItem,
+        languageCode,
+      ),
+      'aSpokenItemCount': LocalizedGrammar.itemCountPhrase(
+        operation.left,
+        visualItem,
+        languageCode,
+      ),
+      'bSpokenItemCount': LocalizedGrammar.itemCountPhrase(
         operation.right,
         visualItem,
         languageCode,
@@ -157,7 +186,15 @@ class DynamicExerciseGenerator implements ExerciseGenerator {
   }
 
   int _visualItemCountFor(LevelConfig level, OperationCandidate operation) {
+    if (operation.type != 'count') {
+      return 0;
+    }
+
     if (!level.visualSupport) {
+      return 0;
+    }
+
+    if (!_allowsConcreteVisualSupport(level)) {
       return 0;
     }
 
@@ -168,150 +205,8 @@ class DynamicExerciseGenerator implements ExerciseGenerator {
     return operation.result;
   }
 
-  String _itemLabel(
-    int count,
-    VisualItem visualItem,
-    String languageCode,
-  ) {
-    if (count == 1) {
-      return visualItem.singularLabel.get(languageCode);
-    }
-
-    return visualItem.pluralLabel.get(languageCode);
-  }
-
-  String _tensLabel(int count, String languageCode) {
-    if (languageCode == 'ca-ES') {
-      return count == 1 ? 'desena' : 'desenes';
-    }
-
-    return count == 1 ? 'decena' : 'decenas';
-  }
-
-  String _additionHint(OperationCandidate operation, String languageCode) {
-    final left = operation.left;
-    final right = operation.right;
-    final result = operation.result;
-
-    if (result <= 10) {
-      return languageCode == 'ca-ES'
-          ? 'Comença en $left i avança $right passos.'
-          : 'Empieza en $left y avanza $right pasos.';
-    }
-
-    if (right >= 10) {
-      final tensPart = (right ~/ 10) * 10;
-      final unitsPart = right % 10;
-      if (unitsPart == 0) {
-        return languageCode == 'ca-ES'
-            ? 'Truc: suma primer $tensPart. Després revisa el resultat.'
-            : 'Truco: suma primero $tensPart. Después revisa el resultado.';
-      }
-
-      return languageCode == 'ca-ES'
-          ? 'Truc: separa $right en $tensPart i $unitsPart. Suma primer $tensPart i després $unitsPart.'
-          : 'Truco: separa $right en $tensPart y $unitsPart. Suma primero $tensPart y después $unitsPart.';
-    }
-
-    final nextTen = ((left ~/ 10) + 1) * 10;
-    final toNextTen = nextTen - left;
-    if (toNextTen > 0 && toNextTen < right) {
-      final remaining = right - toNextTen;
-      return languageCode == 'ca-ES'
-          ? 'Truc: completa la desena. De $left a $nextTen falten $toNextTen; després suma $remaining.'
-          : 'Truco: completa la decena. De $left a $nextTen faltan $toNextTen; después suma $remaining.';
-    }
-
-    return languageCode == 'ca-ES'
-        ? 'Truc: suma les unitats a poc a poc i comprova el total.'
-        : 'Truco: suma las unidades poco a poco y comprueba el total.';
-  }
-
-  String _subtractionHint(OperationCandidate operation, String languageCode) {
-    final left = operation.left;
-    final right = operation.right;
-
-    if (left <= 10) {
-      return languageCode == 'ca-ES'
-          ? 'Comença en $left i retrocedeix $right passos.'
-          : 'Empieza en $left y retrocede $right pasos.';
-    }
-
-    if (right >= 10) {
-      final tensPart = (right ~/ 10) * 10;
-      final unitsPart = right % 10;
-      if (unitsPart == 0) {
-        return languageCode == 'ca-ES'
-            ? 'Truc: treu primer $tensPart. Després revisa el resultat.'
-            : 'Truco: quita primero $tensPart. Después revisa el resultado.';
-      }
-
-      return languageCode == 'ca-ES'
-          ? 'Truc: separa $right en $tensPart i $unitsPart. Treu primer $tensPart i després $unitsPart.'
-          : 'Truco: separa $right en $tensPart y $unitsPart. Quita primero $tensPart y después $unitsPart.';
-    }
-
-    final previousTen = (left ~/ 10) * 10;
-    final toPreviousTen = left - previousTen;
-    if (toPreviousTen > 0 && toPreviousTen < right) {
-      final remaining = right - toPreviousTen;
-      return languageCode == 'ca-ES'
-          ? 'Truc: baixa fins a la desena. De $left a $previousTen treus $toPreviousTen; després treus $remaining.'
-          : 'Truco: baja hasta la decena. De $left a $previousTen quitas $toPreviousTen; después quitas $remaining.';
-    }
-
-    return languageCode == 'ca-ES'
-        ? 'Truc: treu les unitats a poc a poc i comprova el resultat.'
-        : 'Truco: quita las unidades poco a poco y comprueba el resultado.';
-  }
-
-  String _countQuestion(VisualItem visualItem, String languageCode) {
-    final gender = visualItem.gender.get(languageCode);
-    if (languageCode == 'ca-ES') {
-      return gender == 'feminine' ? "Quantes n'hi ha?" : "Quants n'hi ha?";
-    }
-
-    return gender == 'feminine' ? '¿Cuántas hay?' : '¿Cuántos hay?';
-  }
-
-  String _totalQuestion(VisualItem visualItem, String languageCode) {
-    final gender = visualItem.gender.get(languageCode);
-    if (languageCode == 'ca-ES') {
-      return gender == 'feminine' ? 'Quantes en té?' : 'Quants en té?';
-    }
-
-    return gender == 'feminine' ? '¿Cuántas tiene?' : '¿Cuántos tiene?';
-  }
-
-  String _remainingQuestion(VisualItem visualItem, String languageCode) {
-    final gender = visualItem.gender.get(languageCode);
-    if (languageCode == 'ca-ES') {
-      return gender == 'feminine' ? 'Quantes en queden?' : 'Quants en queden?';
-    }
-
-    return gender == 'feminine' ? '¿Cuántas quedan?' : '¿Cuántos quedan?';
-  }
-
-  String _remainingItemsPronoun(VisualItem visualItem, String languageCode) {
-    final gender = visualItem.gender.get(languageCode);
-    if (languageCode == 'ca-ES') {
-      return gender == 'feminine' ? 'les que queden' : 'els que queden';
-    }
-
-    return gender == 'feminine' ? 'las que quedan' : 'los que quedan';
-  }
-
-  String _spokenItemCountPhrase(
-    int count,
-    VisualItem visualItem,
-    String languageCode,
-  ) {
-    if (count == 1) {
-      return visualItem.oneWithArticleLabel.get(languageCode);
-    }
-
-    return '${_numberWord(count, languageCode)} '
-        '${visualItem.pluralLabel.get(languageCode)}';
+  bool _allowsConcreteVisualSupport(LevelConfig level) {
+    return level.worldId == 'heart_forest' || level.worldId == 'practice';
   }
 
   String _apply(String pattern, Map<String, String> replacements) {
@@ -322,60 +217,7 @@ class DynamicExerciseGenerator implements ExerciseGenerator {
 
     return value;
   }
-
-  String _numberWord(int value, String languageCode) {
-    final words = languageCode == 'ca-ES' ? _caNumbers : _esNumbers;
-    return words[value] ?? '$value';
-  }
 }
-
-const _esNumbers = {
-  0: 'cero',
-  1: 'uno',
-  2: 'dos',
-  3: 'tres',
-  4: 'cuatro',
-  5: 'cinco',
-  6: 'seis',
-  7: 'siete',
-  8: 'ocho',
-  9: 'nueve',
-  10: 'diez',
-  11: 'once',
-  12: 'doce',
-  13: 'trece',
-  14: 'catorce',
-  15: 'quince',
-  16: 'dieciséis',
-  17: 'diecisiete',
-  18: 'dieciocho',
-  19: 'diecinueve',
-  20: 'veinte',
-};
-
-const _caNumbers = {
-  0: 'zero',
-  1: 'un',
-  2: 'dos',
-  3: 'tres',
-  4: 'quatre',
-  5: 'cinc',
-  6: 'sis',
-  7: 'set',
-  8: 'vuit',
-  9: 'nou',
-  10: 'deu',
-  11: 'onze',
-  12: 'dotze',
-  13: 'tretze',
-  14: 'catorze',
-  15: 'quinze',
-  16: 'setze',
-  17: 'disset',
-  18: 'divuit',
-  19: 'dinou',
-  20: 'vint',
-};
 
 final exerciseGeneratorProvider = Provider<ExerciseGenerator>((ref) {
   return DynamicExerciseGenerator();

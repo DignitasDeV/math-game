@@ -80,25 +80,25 @@
   {
     "id": "badge_rainbow_addition",
     "type": "badge",
-    "name": { "es": "Sumas arcoíris", "ca": "Sumes arc de Sant Martí" },
+    "name": { "es": "Sumas arcoíris", "ca": "Sumes de l'arc de Sant Martí" },
     "assetPath": "assets/images/rewards/badges/badge_rainbow_addition.webp"
   },
   {
     "id": "badge_rainbow_subtraction",
     "type": "badge",
-    "name": { "es": "Restas arcoíris", "ca": "Restes arc de Sant Martí" },
+    "name": { "es": "Restas arcoíris", "ca": "Restes de l'arc de Sant Martí" },
     "assetPath": "assets/images/rewards/badges/badge_rainbow_subtraction.webp"
   },
   {
     "id": "cape_rainbow",
     "type": "accessory",
-    "name": { "es": "Capa arcoíris", "ca": "Capa arc de Sant Martí" },
+    "name": { "es": "Capa arcoíris", "ca": "Capa de l'arc de Sant Martí" },
     "assetPath": "assets/images/rewards/accessories/cape_rainbow.webp"
   },
   {
     "id": "sticker_crystal_gem",
     "type": "sticker",
-    "name": { "es": "Gema de cristal", "ca": "Gemma de cristall" },
+    "name": { "es": "Gema de cristal", "ca": "Gemma de vidre" },
     "assetPath": "assets/images/rewards/stickers/sticker_crystal_gem.webp"
   },
   {
@@ -110,19 +110,19 @@
   {
     "id": "badge_crystal_addition",
     "type": "badge",
-    "name": { "es": "Sumas de cristal", "ca": "Sumes de cristall" },
+    "name": { "es": "Sumas de cristal", "ca": "Sumes de vidre" },
     "assetPath": "assets/images/rewards/badges/badge_crystal_addition.webp"
   },
   {
     "id": "badge_crystal_subtraction",
     "type": "badge",
-    "name": { "es": "Restas de cristal", "ca": "Restes de cristall" },
+    "name": { "es": "Restas de cristal", "ca": "Restes de vidre" },
     "assetPath": "assets/images/rewards/badges/badge_crystal_subtraction.webp"
   },
   {
     "id": "crown_crystal",
     "type": "accessory",
-    "name": { "es": "Corona de cristal", "ca": "Corona de cristall" },
+    "name": { "es": "Corona de cristal", "ca": "Corona de vidre" },
     "assetPath": "assets/images/rewards/accessories/crown_crystal.webp"
   },
   {
@@ -158,7 +158,7 @@
   {
     "id": "magic_wand",
     "type": "accessory",
-    "name": { "es": "Varita magica", "ca": "Vareta magica" },
+    "name": { "es": "Varita magica", "ca": "Vareta màgica" },
     "assetPath": "assets/images/rewards/accessories/magic_wand.webp"
   },
   {
@@ -170,7 +170,7 @@
   {
     "id": "wings_rainbow",
     "type": "accessory",
-    "name": { "es": "Alas arcoiris", "ca": "Ales arc de Sant Marti" },
+    "name": { "es": "Alas arcoiris", "ca": "Ales de l'arc de Sant Martí" },
     "assetPath": "assets/images/rewards/accessories/wings_rainbow.webp"
   },
   {
@@ -188,7 +188,7 @@
   {
     "id": "sticker_rainbow",
     "type": "sticker",
-    "name": { "es": "Pegatina arcoiris", "ca": "Enganxina arc de Sant Marti" },
+    "name": { "es": "Pegatina arcoiris", "ca": "Enganxina de l'arc de Sant Martí" },
     "assetPath": "assets/images/rewards/stickers/sticker_rainbow.webp"
   },
   {

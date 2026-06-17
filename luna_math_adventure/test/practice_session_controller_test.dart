@@ -25,7 +25,8 @@ void main() {
       expect(level.questionsToComplete, practiceQuestionsToComplete);
       expect(level.rewardId, isNull);
       expect(candidates, isNotEmpty);
-      expect(candidates.every((candidate) => candidate.type == 'count'), isTrue);
+      expect(
+          candidates.every((candidate) => candidate.type == 'count'), isTrue);
       expect(candidates.every((candidate) => candidate.result <= 5), isTrue);
     });
 
@@ -103,7 +104,8 @@ void main() {
     });
   });
 
-  test('controller completes after eight questions without progress state', () async {
+  test('controller completes after eight questions without progress state',
+      () async {
     final container = ProviderContainer(
       overrides: [
         contentRepositoryProvider.overrideWithValue(_FakeContentRepository()),
@@ -134,6 +136,56 @@ void main() {
     final completed = container.read(practiceSessionProvider).valueOrNull!;
     expect(completed.isComplete, isTrue);
     expect(completed.correctAnswers, practiceQuestionsToComplete);
+  });
+
+  test('controller advances hint steps and resets them on next exercise',
+      () async {
+    final container = ProviderContainer(
+      overrides: [
+        contentRepositoryProvider.overrideWithValue(_FakeContentRepository()),
+      ],
+    );
+    addTearDown(container.dispose);
+    final subscription = container.listen(
+      practiceSessionProvider,
+      (_, __) {},
+      fireImmediately: true,
+    );
+    addTearDown(subscription.close);
+
+    final controller = container.read(practiceSessionProvider.notifier);
+    await controller.start(
+      const PracticeSessionConfig(
+        topic: PracticeTopic.addition,
+        difficulty: PracticeDifficulty.upTo10,
+      ),
+    );
+
+    final initial = container.read(practiceSessionProvider).valueOrNull!;
+    expect(initial.hasAskedHint, isFalse);
+    expect(initial.hintStepIndex, -1);
+    expect(initial.exercise.hintSteps.length, greaterThanOrEqualTo(2));
+
+    controller.showHint();
+    final firstHint = container.read(practiceSessionProvider).valueOrNull!;
+    expect(firstHint.hasAskedHint, isTrue);
+    expect(firstHint.hintStepIndex, 0);
+
+    controller.showHint();
+    final secondHint = container.read(practiceSessionProvider).valueOrNull!;
+    expect(secondHint.hintStepIndex, 1);
+
+    controller.showHint();
+    final cappedHint = container.read(practiceSessionProvider).valueOrNull!;
+    expect(cappedHint.hintStepIndex, cappedHint.exercise.hintSteps.length - 1);
+
+    controller.submitAnswer(cappedHint.exercise.answer);
+    controller.nextExercise();
+
+    final next = container.read(practiceSessionProvider).valueOrNull!;
+    expect(next.questionIndex, 2);
+    expect(next.hasAskedHint, isFalse);
+    expect(next.hintStepIndex, -1);
   });
 }
 
@@ -168,7 +220,8 @@ class _FakeContentRepository implements ContentRepository {
         type: 'subtraction',
         visiblePattern: LocalizedText(es: '{a} - {b}', ca: '{a} - {b}'),
         spokenPattern: LocalizedText(es: '{a} - {b}', ca: '{a} - {b}'),
-        hintPattern: LocalizedText(es: 'Resta despacio', ca: 'Resta a poc a poc'),
+        hintPattern:
+            LocalizedText(es: 'Resta despacio', ca: 'Resta a poc a poc'),
         spokenHintPattern: LocalizedText(
           es: 'Resta despacio',
           ca: 'Resta a poc a poc',

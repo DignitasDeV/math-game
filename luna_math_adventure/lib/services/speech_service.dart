@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 
 import '../models/tts_voice_option.dart';
+import 'localized_grammar.dart';
 
 class SpeechClip {
   const SpeechClip({
@@ -315,7 +316,7 @@ class HybridSpeechService implements SpeechService {
 
   String _speechTextFor(String text, String languageCode) {
     final isCatalan = languageCode == 'ca-ES';
-    final plus = isCatalan ? ' mes ' : ' mas ';
+    final plus = isCatalan ? ' més ' : ' mas ';
     final minus = isCatalan ? ' menys ' : ' menos ';
     final equals = isCatalan ? ' igual a ' : ' igual a ';
     final divided = isCatalan ? ' dividit entre ' : ' dividido entre ';
@@ -339,10 +340,7 @@ class HybridSpeechService implements SpeechService {
   }
 
   String _numberWordForSpeech(int value, String languageCode) {
-    final words = languageCode == 'ca-ES'
-        ? _catalanSpeechNumbers
-        : _spanishSpeechNumbers;
-    return words[value] ?? '$value';
+    return LocalizedGrammar.numberWord(value, languageCode);
   }
 }
 
@@ -354,91 +352,3 @@ final speechServiceProvider = Provider<SpeechService>((ref) {
   ref.onDispose(service.dispose);
   return service;
 });
-
-const _spanishSpeechNumbers = {
-  0: 'cero',
-  1: 'uno',
-  2: 'dos',
-  3: 'tres',
-  4: 'cuatro',
-  5: 'cinco',
-  6: 'seis',
-  7: 'siete',
-  8: 'ocho',
-  9: 'nueve',
-  10: 'diez',
-  11: 'once',
-  12: 'doce',
-  13: 'trece',
-  14: 'catorce',
-  15: 'quince',
-  16: 'dieciseis',
-  17: 'diecisiete',
-  18: 'dieciocho',
-  19: 'diecinueve',
-  20: 'veinte',
-  21: 'veintiuno',
-  22: 'veintidos',
-  23: 'veintitres',
-  24: 'veinticuatro',
-  25: 'veinticinco',
-  26: 'veintiseis',
-  27: 'veintisiete',
-  28: 'veintiocho',
-  29: 'veintinueve',
-  30: 'treinta',
-  31: 'treinta y uno',
-  32: 'treinta y dos',
-  33: 'treinta y tres',
-  34: 'treinta y cuatro',
-  35: 'treinta y cinco',
-  36: 'treinta y seis',
-  37: 'treinta y siete',
-  38: 'treinta y ocho',
-  39: 'treinta y nueve',
-  40: 'cuarenta',
-};
-
-const _catalanSpeechNumbers = {
-  0: 'zero',
-  1: 'un',
-  2: 'dos',
-  3: 'tres',
-  4: 'quatre',
-  5: 'cinc',
-  6: 'sis',
-  7: 'set',
-  8: 'vuit',
-  9: 'nou',
-  10: 'deu',
-  11: 'onze',
-  12: 'dotze',
-  13: 'tretze',
-  14: 'catorze',
-  15: 'quinze',
-  16: 'setze',
-  17: 'disset',
-  18: 'divuit',
-  19: 'dinou',
-  20: 'vint',
-  21: 'vint-i-un',
-  22: 'vint-i-dos',
-  23: 'vint-i-tres',
-  24: 'vint-i-quatre',
-  25: 'vint-i-cinc',
-  26: 'vint-i-sis',
-  27: 'vint-i-set',
-  28: 'vint-i-vuit',
-  29: 'vint-i-nou',
-  30: 'trenta',
-  31: 'trenta-un',
-  32: 'trenta-dos',
-  33: 'trenta-tres',
-  34: 'trenta-quatre',
-  35: 'trenta-cinc',
-  36: 'trenta-sis',
-  37: 'trenta-set',
-  38: 'trenta-vuit',
-  39: 'trenta-nou',
-  40: 'quaranta',
-};

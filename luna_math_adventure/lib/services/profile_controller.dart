@@ -130,6 +130,29 @@ class ProfileController extends AsyncNotifier<FamilyProfiles> {
     );
   }
 
+  Future<void> updateActiveProfileSoundEffects(bool isEnabled) async {
+    final currentFamily = state.valueOrNull ?? await build();
+    final activeProfile = currentFamily.activeProfile;
+    if (activeProfile == null) {
+      return;
+    }
+
+    final profiles = [
+      for (final profile in currentFamily.profiles)
+        if (profile.id == activeProfile.id)
+          profile.copyWith(soundEffectsEnabled: isEnabled)
+        else
+          profile,
+    ];
+
+    await _saveFamily(
+      FamilyProfiles(
+        profiles: profiles,
+        activeProfileId: currentFamily.activeProfileId,
+      ),
+    );
+  }
+
   Future<void> clearFamily() async {
     state = const AsyncLoading();
     await ref.read(profileRepositoryProvider).clearFamily();

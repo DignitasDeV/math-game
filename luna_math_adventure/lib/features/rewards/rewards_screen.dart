@@ -16,6 +16,7 @@ import '../../services/audio_service.dart';
 import '../../services/content_repository.dart';
 import '../../services/profile_controller.dart';
 import '../../services/progress_repository.dart';
+import '../../services/ui_copy.dart';
 
 class RewardsScreen extends ConsumerWidget {
   const RewardsScreen({super.key});
@@ -31,7 +32,8 @@ class RewardsScreen extends ConsumerWidget {
 
     return MagicScaffold(
       title: 'Recompensas',
-      backgroundAssetPath: 'assets/images/backgrounds/crystal_castle_screen.webp',
+      backgroundAssetPath:
+          'assets/images/backgrounds/crystal_castle_screen.webp',
       child: rewardsState.when(
         data: (rewards) => levelsState.when(
           data: (levels) => _RewardsContent(
@@ -69,9 +71,8 @@ class _RewardsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final earnedCount = rewards
-        .where((reward) => earnedRewardIds.contains(reward.id))
-        .length;
+    final earnedCount =
+        rewards.where((reward) => earnedRewardIds.contains(reward.id)).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,7 +99,7 @@ class _RewardsContent extends StatelessWidget {
               crossAxisCount: _columnCount(context),
               crossAxisSpacing: AppSpacing.md,
               mainAxisSpacing: AppSpacing.md,
-              childAspectRatio: 0.92,
+              childAspectRatio: _childAspectRatio(context),
             ),
             itemBuilder: (context, index) {
               final reward = rewards[index];
@@ -110,10 +111,7 @@ class _RewardsContent extends StatelessWidget {
                 earned: earned,
                 unlockLevel: unlockLevel,
                 languageCode: languageCode,
-              )
-                  .animate(delay: (35 * index).ms)
-                  .fadeIn(duration: 240.ms)
-                  .scale(
+              ).animate(delay: (35 * index).ms).fadeIn(duration: 240.ms).scale(
                     begin: const Offset(0.94, 0.94),
                     end: const Offset(1, 1),
                     curve: Curves.easeOutBack,
@@ -142,7 +140,19 @@ class _RewardsContent extends StatelessWidget {
     if (width >= 460) {
       return 3;
     }
+    if (width < 380) {
+      return 1;
+    }
     return 2;
+  }
+
+  double _childAspectRatio(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (width < 380) {
+      return 1.35;
+    }
+
+    return 0.92;
   }
 
   LevelConfig? _levelForReward(String rewardId) {
@@ -292,14 +302,16 @@ class _RewardTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: AppTypography.caption.copyWith(
-                  color: earned ? AppColors.purpleText : AppColors.purpleTextLight,
+                  color:
+                      earned ? AppColors.purpleText : AppColors.purpleTextLight,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Icon(
                 earned ? Icons.check_circle_rounded : Icons.lock_rounded,
-                color: earned ? AppColors.successGreen : AppColors.purpleTextLight,
+                color:
+                    earned ? AppColors.successGreen : AppColors.purpleTextLight,
                 size: 18,
               ),
             ],
@@ -385,7 +397,7 @@ class _RewardDetailsDialog extends StatelessWidget {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: Text(languageCode == 'ca-ES' ? 'Dacord' : 'Vale'),
+                    child: Text(UiCopy.ok(languageCode)),
                   ),
                 ),
               ],
@@ -399,8 +411,8 @@ class _RewardDetailsDialog extends StatelessWidget {
   String _statusText() {
     if (languageCode == 'ca-ES') {
       return earned
-          ? 'Ja la tens a la teva col.leccio.'
-          : 'Encara no esta desbloquejada.';
+          ? 'Ja la tens a la teva col·lecció.'
+          : 'Encara no està desbloquejada.';
     }
 
     return earned
@@ -509,13 +521,13 @@ class _RewardHowToUnlock extends StatelessWidget {
     final level = unlockLevel;
     if (level == null) {
       return languageCode == 'ca-ES'
-          ? 'Aquesta recompensa especial encara no esta assignada a un nivell.'
+          ? 'Aquesta recompensa especial encara no està assignada a un nivell.'
           : 'Esta recompensa especial aun no esta asignada a un nivel.';
     }
 
     final levelTitle = level.title.get(languageCode);
     return languageCode == 'ca-ES'
-        ? 'S aconsegueix completant el nivell: $levelTitle.'
+        ? "S'aconsegueix completant el nivell: $levelTitle."
         : 'Se consigue completando el nivel: $levelTitle.';
   }
 

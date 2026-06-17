@@ -19,7 +19,8 @@ class LanguageSelectionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MagicScaffold(
       title: 'Idioma',
-      backgroundAssetPath: 'assets/images/backgrounds/home_background_screen.webp',
+      backgroundAssetPath:
+          'assets/images/backgrounds/home_background_screen.webp',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -78,6 +79,10 @@ class _LanguageButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconColor = HSLColor.fromColor(color).withLightness(0.35).toColor();
+    final isNarrow =
+        MediaQuery.sizeOf(context).width < AppBreakpoints.narrowWidth;
+    final horizontalPadding = isNarrow ? AppSpacing.md : AppSpacing.xl;
+    final gap = isNarrow ? AppSpacing.md : AppSpacing.lg;
 
     return Material(
       color: color.withValues(alpha: 0.15),
@@ -87,8 +92,8 @@ class _LanguageButton extends StatelessWidget {
         onTap: () => playTapAndRun(context, onPressed),
         splashColor: color.withValues(alpha: 0.3),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
             vertical: AppSpacing.lg,
           ),
           child: Row(
@@ -108,21 +113,29 @@ class _LanguageButton extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.lg),
+              SizedBox(width: gap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       language.label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTypography.sectionTitle.copyWith(
                         color: iconColor,
                       ),
                     ),
-                    Text(subtitle, style: AppTypography.caption),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.caption,
+                    ),
                   ],
                 ),
               ),
+              SizedBox(width: isNarrow ? AppSpacing.sm : AppSpacing.md),
               Icon(Icons.arrow_forward_ios_rounded, color: iconColor, size: 20),
             ],
           ),
